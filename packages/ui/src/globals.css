@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Rootspun design tokens.
+ *
+ * Semantic HSL variables so white-label agencies (RS-307) can override --primary
+ * and friends at runtime from their branding JSON without a rebuild. "Growth"
+ * green primary over a cool neutral ink base; a warm amber for warnings/alerts.
+ */
+@layer base {
+  :root {
+    --background: 160 20% 99%;
+    --foreground: 170 24% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 170 24% 12%;
+
+    --primary: 158 64% 32%;         /* growth green */
+    --primary-foreground: 160 40% 98%;
+
+    --secondary: 165 22% 94%;
+    --secondary-foreground: 170 24% 18%;
+
+    --muted: 165 16% 95%;
+    --muted-foreground: 170 10% 42%;
+
+    --success: 142 62% 38%;
+    --success-foreground: 140 40% 98%;
+
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 168 16% 88%;
+    --input: 168 16% 88%;
+    --ring: 158 64% 32%;
+
+    --radius: 0.625rem;
+
+    /* Engine categorical palette (validated colorblind-safe, light mode). */
+    --engine-google-organic: #2f9e6b;
+    --engine-ai-overview: #3b6fd4;
+    --engine-ai-mode: #c2410c;
+    --engine-chatgpt: #8b5cf6;
+    --engine-gemini: #be185d;
+    --engine-perplexity: #0891b2;
+  }
+
+  :root[data-theme="dark"],
+  .dark {
+    --background: 174 28% 7%;
+    --foreground: 160 20% 94%;
+
+    --card: 174 24% 10%;
+    --card-foreground: 160 20% 94%;
+
+    --primary: 158 58% 48%;
+    --primary-foreground: 174 40% 8%;
+
+    --secondary: 172 16% 16%;
+    --secondary-foreground: 160 20% 94%;
+
+    --muted: 172 14% 16%;
+    --muted-foreground: 165 12% 62%;
+
+    --success: 142 52% 50%;
+    --success-foreground: 140 40% 8%;
+
+    --destructive: 0 62% 54%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 172 14% 20%;
+    --input: 172 14% 22%;
+    --ring: 158 58% 48%;
+
+    /* Engine categorical palette (validated colorblind-safe, dark mode). */
+    --engine-google-organic: #2fa571;
+    --engine-ai-overview: #4785e0;
+    --engine-ai-mode: #dd6a1e;
+    --engine-chatgpt: #8f6be6;
+    --engine-gemini: #e2589a;
+    --engine-perplexity: #1593ad;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "rootspun",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rootspun by XP — white-label AI & organic search visibility platform",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "db:types": "supabase gen types typescript --local > packages/db/src/types.ts",
+    "db:reset": "supabase db reset"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "eslint": "^9.13.0",
+    "prettier": "^3.3.3",
+    "turbo": "^2.2.3",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

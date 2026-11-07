@@ -1,0 +1,87 @@
+{
+  "version": "2026-11-07",
+  "source": "Google Search Central",
+  "rules": [
+    {
+      "id": "rule.indexing.noindex",
+      "title": "Block search indexing with noindex",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/block-indexing",
+      "summary": "A noindex rule in a meta tag or HTTP header tells Google to drop the page from search results. Pages that must rank must not carry noindex.",
+      "category": "indexing",
+      "whyGoogleCares": "Google will not rank a page it has been told to exclude from the index.",
+      "fixHint": "Remove the noindex meta tag / X-Robots-Tag header and request reindexing."
+    },
+    {
+      "id": "rule.crawl.blocked",
+      "title": "Introduction to robots.txt",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/robots/intro",
+      "summary": "robots.txt controls which URLs crawlers may fetch. A Disallow on a URL prevents Googlebot (and, via their own tokens, AI crawlers) from reading it.",
+      "category": "crawling",
+      "whyGoogleCares": "If Google cannot fetch the URL it cannot evaluate or rank its content.",
+      "fixHint": "Remove the Disallow for the affected path, and verify no CDN/WAF rule blocks the bot's user agent or IP ranges."
+    },
+    {
+      "id": "rule.snippet.nosnippet",
+      "title": "Control snippets in search results",
+      "url": "https://developers.google.com/search/docs/appearance/snippet",
+      "summary": "nosnippet, data-nosnippet and max-snippet limit how much text Google may show. AI features that quote source text are suppressed where snippets are disallowed.",
+      "category": "appearance",
+      "whyGoogleCares": "AI Overviews and AI Mode build answers from snippet-eligible content; blocking snippets removes the page as a usable source.",
+      "fixHint": "Remove nosnippet / data-nosnippet from content you want cited, or set a generous max-snippet."
+    },
+    {
+      "id": "rule.cwv.poor",
+      "title": "Understanding Core Web Vitals and Google Search results",
+      "url": "https://developers.google.com/search/docs/appearance/core-web-vitals",
+      "summary": "Core Web Vitals (LCP, INP, CLS) measure loading, interactivity and visual stability. 'Good' thresholds are LCP ≤ 2.5s, INP ≤ 200ms, CLS ≤ 0.1.",
+      "category": "experience",
+      "whyGoogleCares": "Page experience is a ranking signal; a slow or unstable template can lose to faster competitors on close calls.",
+      "fixHint": "Optimise the slowest template: image sizing, render-blocking resources, main-thread work and layout reservations."
+    },
+    {
+      "id": "rule.content.no_answer",
+      "title": "Creating helpful, reliable, people-first content",
+      "url": "https://developers.google.com/search/docs/fundamentals/creating-helpful-content",
+      "summary": "Content should satisfy the searcher's intent. If no page directly answers a query, there is nothing for Google or AI engines to surface.",
+      "category": "content",
+      "whyGoogleCares": "Search and AI answers reward pages that comprehensively and clearly answer the question being asked.",
+      "fixHint": "Create or expand a page that directly and thoroughly answers the prompt, with clear headings and supporting entities."
+    },
+    {
+      "id": "rule.content.competitor_cited",
+      "title": "Search Essentials",
+      "url": "https://developers.google.com/search/docs/essentials",
+      "summary": "When competitors are consistently cited, their pages better demonstrate relevance, experience and authority for the query.",
+      "category": "content",
+      "whyGoogleCares": "AI answers and organic results cite the sources that best demonstrate E-E-A-T for the query.",
+      "fixHint": "Study the cited competitor pages; close gaps in depth, freshness, structured data and demonstrated expertise."
+    },
+    {
+      "id": "rule.spam.scaled_content",
+      "title": "Scaled content abuse",
+      "url": "https://developers.google.com/search/docs/essentials/spam-policies#scaled-content-abuse",
+      "summary": "Generating many pages primarily for ranking, with little value to users, is a spam policy violation regardless of how they are produced.",
+      "category": "spam",
+      "whyGoogleCares": "Scaled low-value content degrades search quality and is subject to manual and algorithmic action.",
+      "fixHint": "Do not mass-produce near-duplicate pages; create fewer, genuinely useful pages."
+    },
+    {
+      "id": "rule.spam.doorway",
+      "title": "Doorway abuse",
+      "url": "https://developers.google.com/search/docs/essentials/spam-policies#doorways",
+      "summary": "Sites or pages created to rank for similar queries (e.g. many near-identical city pages) that funnel users to one destination are doorways.",
+      "category": "spam",
+      "whyGoogleCares": "Doorway pages exist to manipulate rankings rather than serve users.",
+      "fixHint": "Consolidate near-duplicate location pages into genuinely distinct, useful pages."
+    },
+    {
+      "id": "rule.spam.site_reputation",
+      "title": "Site reputation abuse",
+      "url": "https://developers.google.com/search/docs/essentials/spam-policies#site-reputation-abuse",
+      "summary": "Publishing third-party content on a host site mainly to exploit the host's ranking signals is site reputation abuse.",
+      "category": "spam",
+      "whyGoogleCares": "It launders the host domain's authority onto content the host does not stand behind.",
+      "fixHint": "Do not host third-party pages to borrow a domain's authority; keep content first-party and editorially owned."
+    }
+  ]
+}

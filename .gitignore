@@ -1,0 +1,38 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# builds
+.next/
+dist/
+out/
+*.tsbuildinfo
+
+# turbo
+.turbo/
+
+# test
+coverage/
+playwright-report/
+test-results/
+
+# env
+.env
+.env.local
+.env*.local
+
+# supabase
+supabase/.branches/
+supabase/.temp/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*

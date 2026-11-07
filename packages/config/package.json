@@ -1,0 +1,12 @@
+{
+  "name": "@rootspun/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig.base.json": "../../tsconfig.base.json",
+    "./eslint": "./eslint.config.js",
+    "./tailwind": "./tailwind.preset.js"
+  },
+  "files": ["eslint.config.js", "tailwind.preset.js"]
+}

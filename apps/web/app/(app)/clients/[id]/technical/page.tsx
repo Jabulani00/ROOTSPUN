@@ -36,6 +36,9 @@ export default async function TechnicalPage({ params }: { params: { id: string }
   const topIssues = [...agg.values()].sort(
     (a, b) => (sevRank[a.severity] ?? 3) - (sevRank[b.severity] ?? 3) || b.n - a.n,
   );
+  const brokenCount = (pages ?? []).filter(
+    (p) => p.status != null && (p.status >= 400 || p.status === 0),
+  ).length;
 
   const { data: access } = await supabase
     .from("crawler_access")
@@ -167,7 +170,14 @@ export default async function TechnicalPage({ params }: { params: { id: string }
 
           <Card>
             <CardHeader>
-              <CardTitle>Pages ({crawl.page_count})</CardTitle>
+              <CardTitle>
+                Pages ({crawl.page_count})
+                {brokenCount > 0 && (
+                  <span className="ml-2 rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-normal text-destructive">
+                    {brokenCount} broken
+                  </span>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">

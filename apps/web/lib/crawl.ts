@@ -57,7 +57,18 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
   const sitemap = await fetchText(`${origin}/sitemap.xml`);
   const sitemapFound = sitemap.status === 200;
 
+  // Seed the crawl with the homepage plus any same-host URLs listed in the sitemap.
   const queue: string[] = [`${origin}/`];
+  if (sitemapFound) {
+    for (const m of sitemap.text.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)) {
+      try {
+        const u = new URL(m[1]!);
+        if (u.host.replace(/^www\./, "") === host && queue.length < max * 6) queue.push(u.toString());
+      } catch {
+        /* skip bad url */
+      }
+    }
+  }
   const visited = new Set<string>();
   const pages: CrawledPage[] = [];
 

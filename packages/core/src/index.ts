@@ -12,6 +12,7 @@ export * as facts from "./facts/index.js";
 export * as robots from "./robots/index.js";
 export * as crawl from "./crawl/index.js";
 export * as seo from "./seo/index.js";
+export * as keywords from "./keywords/index.js";
 
 // Convenience re-exports of the most common entry points.
 export { scoreSlice, unifiedVisibilityScore, shareOfVoice, promptVisibility } from "./scoring/uvs.js";
@@ -37,6 +38,8 @@ export type { HtmlSignals } from "./crawl/html.js";
 export { analyzePage, pageIssues, isExpectedNoindexPath } from "./seo/analyze.js";
 export { analyzeAeo, aeoSignals } from "./seo/aeo.js";
 export type { AeoResult, AeoSignals, AeoRecommendation } from "./seo/aeo.js";
+export { analyzeKeyword, rankKeywords } from "./keywords/rank.js";
+export type { KeywordInput, KeywordRank, KeywordSummary, RankBucket, SerpResult } from "./keywords/rank.js";
 export { collectSitemapUrls, sitemapLocs, sitemapUrlsFromRobots } from "./crawl/sitemap.js";
 export type { SitemapFetcher, SitemapFetchResult } from "./crawl/sitemap.js";
 export type { PageAnalysis, SeoIssue, IssueSeverity } from "./seo/analyze.js";

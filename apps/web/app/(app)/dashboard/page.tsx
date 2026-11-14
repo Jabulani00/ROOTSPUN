@@ -17,6 +17,19 @@ export default async function DashboardPage() {
     supabase.from("scores_daily").select("id", { count: "exact", head: true }),
   ]);
 
+  // Latest overall UVS per client for the clients overview.
+  const { data: latestScores } = await supabase
+    .from("scores_daily")
+    .select("client_id, uvs, date")
+    .is("engine_id", null)
+    .is("topic", null)
+    .order("date", { ascending: false })
+    .limit(400);
+  const uvsByClient = new Map<string, number>();
+  for (const s of latestScores ?? []) {
+    if (s.client_id && !uvsByClient.has(s.client_id)) uvsByClient.set(s.client_id, Number(s.uvs));
+  }
+
   const steps: ChecklistStep[] = [
     { label: "Add your first client", done: clientCount > 0, href: "/clients/new", hint: "Domains, brand terms and competitors." },
     {
@@ -72,11 +85,45 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-3">
-          <StatCard label="Clients tracked" value={String(clientCount)} />
-          <StatCard label="Prompts tracked" value={String(promptCount ?? 0)} />
-          <StatCard label="Days scored" value={String(scoreCount ?? 0)} />
-        </div>
+        <>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <StatCard label="Clients tracked" value={String(clientCount)} />
+            <StatCard label="Prompts tracked" value={String(promptCount ?? 0)} />
+            <StatCard label="Days scored" value={String(scoreCount ?? 0)} />
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Clients</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="divide-y rounded-md border text-sm">
+                {clients!.map((c) => {
+                  const uvs = uvsByClient.get(c.id);
+                  return (
+                    <li key={c.id}>
+                      <Link
+                        href={`/clients/${c.id}/visibility` as never}
+                        className="flex items-center justify-between px-3 py-2.5 hover:bg-secondary"
+                      >
+                        <span className="font-medium">{c.name}</span>
+                        <span className="tabular-nums">
+                          {typeof uvs === "number" ? (
+                            <>
+                              <span className="text-muted-foreground">UVS </span>
+                              {uvs.toFixed(1)}
+                            </>
+                          ) : (
+                            <span className="text-muted-foreground">not scored yet</span>
+                          )}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );

@@ -52,14 +52,14 @@ export function AppShell({
             label="Agency"
             value={activeAgencyId}
             options={agencies}
-            onNavigate={() => `/dashboard`}
+            hrefTemplate="/dashboard"
           />
           {clients.length > 0 && (
             <Switcher
               label="Client"
               value={activeClientId}
               options={clients}
-              onNavigate={(id) => `/clients/${id}/visibility`}
+              hrefTemplate="/clients/:id/visibility"
             />
           )}
         </div>

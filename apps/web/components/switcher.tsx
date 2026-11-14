@@ -14,14 +14,18 @@ export function Switcher({
   label,
   value,
   options,
-  onNavigate,
+  hrefTemplate,
   className,
 }: {
   label: string;
   value?: string;
   options: SwitcherOption[];
-  /** Given the chosen id, return the path to navigate to. */
-  onNavigate: (id: string) => string;
+  /**
+   * Path to navigate to on change, with `:id` standing in for the chosen id
+   * (e.g. `/clients/:id/visibility`). A plain string is passed instead of a
+   * function so this works from a Server Component across the client boundary.
+   */
+  hrefTemplate: string;
   className?: string;
 }) {
   const router = useRouter();
@@ -30,7 +34,7 @@ export function Switcher({
       <span className="sr-only">{label}</span>
       <select
         value={value}
-        onChange={(e) => router.push(onNavigate(e.target.value) as never)}
+        onChange={(e) => router.push(hrefTemplate.replace(":id", encodeURIComponent(e.target.value)) as never)}
         className="h-9 appearance-none rounded-md border border-input bg-card pl-3 pr-8 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label={label}
       >

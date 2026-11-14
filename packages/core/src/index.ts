@@ -35,6 +35,8 @@ export type { RobotsGroup, RobotsRule } from "./robots/robots.js";
 export { extractHtmlSignals, renderedVsRawDiff } from "./crawl/html.js";
 export type { HtmlSignals } from "./crawl/html.js";
 export { analyzePage, pageIssues, isExpectedNoindexPath } from "./seo/analyze.js";
+export { analyzeAeo, aeoSignals } from "./seo/aeo.js";
+export type { AeoResult, AeoSignals, AeoRecommendation } from "./seo/aeo.js";
 export { collectSitemapUrls, sitemapLocs, sitemapUrlsFromRobots } from "./crawl/sitemap.js";
 export type { SitemapFetcher, SitemapFetchResult } from "./crawl/sitemap.js";
 export type { PageAnalysis, SeoIssue, IssueSeverity } from "./seo/analyze.js";

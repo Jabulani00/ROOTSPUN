@@ -18,6 +18,7 @@ export interface CrawledPage {
 
 export interface CrawlResult {
   robotsFound: boolean;
+  sitemapFound: boolean;
   crawlerAccess: { bot: string; allowed: boolean }[];
   pages: CrawledPage[];
 }
@@ -53,6 +54,8 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
   const robots = await fetchText(`${origin}/robots.txt`);
   const robotsTxt = robots.status === 200 ? robots.text : "";
   const crawlerAccess = CRAWL_BOTS.map((bot) => ({ bot, allowed: isPathAllowed(robotsTxt, bot, "/") }));
+  const sitemap = await fetchText(`${origin}/sitemap.xml`);
+  const sitemapFound = sitemap.status === 200;
 
   const queue: string[] = [`${origin}/`];
   const visited = new Set<string>();
@@ -100,5 +103,5 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
     }
   }
 
-  return { robotsFound: robots.status === 200, crawlerAccess, pages };
+  return { robotsFound: robots.status === 200, sitemapFound, crawlerAccess, pages };
 }

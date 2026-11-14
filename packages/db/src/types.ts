@@ -321,8 +321,10 @@ export interface Database {
           finished_at: string | null;
           page_count: number;
           status: string;
+          robots_found: boolean | null;
+          sitemap_found: boolean | null;
         }>;
-        Insert: { agency_id: string; client_id: string; page_count?: number; status?: string; finished_at?: string | null };
+        Insert: { agency_id: string; client_id: string; page_count?: number; status?: string; finished_at?: string | null; robots_found?: boolean | null; sitemap_found?: boolean | null };
         Update: Partial<{ finished_at: string | null; page_count: number; status: string }>;
         Relationships: [];
       };

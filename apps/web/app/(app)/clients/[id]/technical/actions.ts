@@ -65,6 +65,8 @@ export async function runCrawlAction(clientId: string): Promise<{ error?: string
       status: "done",
       page_count: result.pages.length,
       finished_at: new Date().toISOString(),
+      robots_found: result.robotsFound,
+      sitemap_found: result.sitemapFound,
     })
     .select("id")
     .single();

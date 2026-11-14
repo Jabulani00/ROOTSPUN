@@ -9,7 +9,7 @@ export default async function TechnicalPage({ params }: { params: { id: string }
 
   const { data: crawl } = await supabase
     .from("crawls")
-    .select("id, page_count, finished_at")
+    .select("id, page_count, finished_at, robots_found, sitemap_found")
     .eq("client_id", params.id)
     .order("started_at", { ascending: false })
     .limit(1)
@@ -110,6 +110,14 @@ export default async function TechnicalPage({ params }: { params: { id: string }
                 <CardTitle>Crawler access</CardTitle>
               </CardHeader>
               <CardContent>
+                <div className="mb-3 flex flex-wrap gap-2 text-sm">
+                  <span className={cn("rounded-full px-3 py-1", crawl.robots_found ? "bg-success/15 text-success" : "bg-primary/15 text-primary")}>
+                    robots.txt {crawl.robots_found ? "found" : "missing"}
+                  </span>
+                  <span className={cn("rounded-full px-3 py-1", crawl.sitemap_found ? "bg-success/15 text-success" : "bg-primary/15 text-primary")}>
+                    sitemap.xml {crawl.sitemap_found ? "found" : "missing"}
+                  </span>
+                </div>
                 <div className="flex flex-wrap gap-2 text-sm">
                   {access.map((a) => (
                     <span

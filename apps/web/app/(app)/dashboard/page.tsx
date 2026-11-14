@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants, Card, CardContent, CardHeader, CardTitle, StatCard } from "@rootspun/ui";
 import { OnboardingChecklist, type ChecklistStep } from "@/components/onboarding-checklist";
+import { SampleDataButton } from "@/components/sample-data-button";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -59,9 +60,15 @@ export default async function DashboardPage() {
               Track a client across Google and AI engines, understand why visibility
               moves, and send a branded report — first results in under 15 minutes.
             </p>
-            <Link href={"/clients/new" as never} className={buttonVariants()}>
-              Get started
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link href={"/clients/new" as never} className={buttonVariants()}>
+                Get started
+              </Link>
+              <SampleDataButton />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Or load a fully populated demo client to explore the dashboards right away.
+            </p>
           </CardContent>
         </Card>
       ) : (

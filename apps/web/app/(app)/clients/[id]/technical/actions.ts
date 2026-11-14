@@ -3,6 +3,38 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { crawlSite } from "@/lib/crawl";
+import { fetchCwv } from "@/lib/cwv";
+
+/** RS-202 — fetch Core Web Vitals (CrUX/PSI) for the client's origin and store them. */
+export async function fetchCwvAction(clientId: string): Promise<{ error?: string; ok?: boolean }> {
+  const db = createClient();
+  const { data: client } = await db.from("clients").select("agency_id").eq("id", clientId).maybeSingle();
+  if (!client) return { error: "Client not found" };
+  const { data: domain } = await db
+    .from("domains")
+    .select("host")
+    .eq("client_id", clientId)
+    .eq("is_primary", true)
+    .maybeSingle();
+  if (!domain) return { error: "Add a primary domain first" };
+
+  const r = await fetchCwv(domain.host);
+  if (r === null) return { error: "No Core Web Vitals data available for this origin yet." };
+  if ("error" in r) return { error: r.error };
+
+  const { error } = await db.from("cwv_metrics").insert({
+    agency_id: client.agency_id,
+    client_id: clientId,
+    template: "origin",
+    lcp_ms: r.lcpMs,
+    inp_ms: r.inpMs,
+    cls: r.cls,
+    source: r.source,
+  });
+  if (error) return { error: error.message };
+  revalidatePath(`/clients/${clientId}/technical`);
+  return { ok: true };
+}
 
 /** RS-201/203 — crawl the client's site now and store the technical-SEO results. */
 export async function runCrawlAction(clientId: string): Promise<{ error?: string; pages?: number }> {

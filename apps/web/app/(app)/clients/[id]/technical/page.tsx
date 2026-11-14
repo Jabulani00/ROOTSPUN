@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, cn } from "@rootspun/ui";
 import { createClient } from "@/lib/supabase/server";
 import { RunCrawlButton } from "@/components/run-crawl-button";
+import { CwvButton } from "@/components/cwv-button";
 
 /** RS-201/203 — crawl results, robots/crawler access, snippet directives. */
 export default async function TechnicalPage({ params }: { params: { id: string } }) {
@@ -43,6 +44,22 @@ export default async function TechnicalPage({ params }: { params: { id: string }
     .order("checked_at", { ascending: false })
     .limit(6);
 
+  const { data: cwv } = await supabase
+    .from("cwv_metrics")
+    .select("lcp_ms, inp_ms, cls, source, date")
+    .eq("client_id", params.id)
+    .order("date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const cwvRows: { label: string; value: string; good: boolean | null }[] = cwv
+    ? [
+        { label: "LCP", value: cwv.lcp_ms != null ? `${(cwv.lcp_ms / 1000).toFixed(2)} s` : "—", good: cwv.lcp_ms != null ? cwv.lcp_ms <= 2500 : null },
+        { label: "INP", value: cwv.inp_ms != null ? `${Math.round(cwv.inp_ms)} ms` : "—", good: cwv.inp_ms != null ? cwv.inp_ms <= 200 : null },
+        { label: "CLS", value: cwv.cls != null ? cwv.cls.toFixed(2) : "—", good: cwv.cls != null ? cwv.cls <= 0.1 : null },
+      ]
+    : [];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -51,6 +68,37 @@ export default async function TechnicalPage({ params }: { params: { id: string }
         </p>
         <RunCrawlButton clientId={params.id} />
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Core Web Vitals</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {cwvRows.length > 0 ? (
+            <div className="grid grid-cols-3 gap-4">
+              {cwvRows.map((m) => (
+                <div key={m.label}>
+                  <p className="text-xs text-muted-foreground">{m.label}</p>
+                  <p
+                    className={cn(
+                      "text-2xl font-semibold tabular-nums",
+                      m.good === true && "text-success",
+                      m.good === false && "text-destructive",
+                    )}
+                  >
+                    {m.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No Core Web Vitals yet. Fetch them from CrUX/PageSpeed (needs a free Google API key).
+            </p>
+          )}
+          <CwvButton clientId={params.id} />
+        </CardContent>
+      </Card>
 
       {!crawl ? (
         <p className="text-sm text-muted-foreground">No crawl yet — run one to analyse the site.</p>

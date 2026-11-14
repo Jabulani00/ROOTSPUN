@@ -11,6 +11,7 @@ export * as coverage from "./coverage/index.js";
 export * as facts from "./facts/index.js";
 export * as robots from "./robots/index.js";
 export * as crawl from "./crawl/index.js";
+export * as seo from "./seo/index.js";
 
 // Convenience re-exports of the most common entry points.
 export { scoreSlice, unifiedVisibilityScore, shareOfVoice, promptVisibility } from "./scoring/uvs.js";
@@ -33,3 +34,5 @@ export { isPathAllowed, parseRobots } from "./robots/robots.js";
 export type { RobotsGroup, RobotsRule } from "./robots/robots.js";
 export { extractHtmlSignals, renderedVsRawDiff } from "./crawl/html.js";
 export type { HtmlSignals } from "./crawl/html.js";
+export { analyzePage, pageIssues } from "./seo/analyze.js";
+export type { PageAnalysis, SeoIssue, IssueSeverity } from "./seo/analyze.js";

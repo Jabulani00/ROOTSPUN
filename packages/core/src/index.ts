@@ -13,6 +13,7 @@ export * as robots from "./robots/index.js";
 export * as crawl from "./crawl/index.js";
 export * as seo from "./seo/index.js";
 export * as keywords from "./keywords/index.js";
+export * as strategy from "./strategy/index.js";
 
 // Convenience re-exports of the most common entry points.
 export { scoreSlice, unifiedVisibilityScore, shareOfVoice, promptVisibility } from "./scoring/uvs.js";
@@ -42,6 +43,8 @@ export { auditOnPage } from "./seo/onpage.js";
 export type { OnPageRecord, SiteAudit, DuplicateGroup, CanonicalIssue } from "./seo/onpage.js";
 export { analyzeKeyword, rankKeywords } from "./keywords/rank.js";
 export type { KeywordInput, KeywordRank, KeywordSummary, RankBucket, SerpResult } from "./keywords/rank.js";
+export { buildStrategy } from "./strategy/strategy.js";
+export type { Strategy, StrategyInput, StrategyAction, Impact, Effort, Area } from "./strategy/strategy.js";
 export { collectSitemapUrls, sitemapLocs, sitemapUrlsFromRobots } from "./crawl/sitemap.js";
 export type { SitemapFetcher, SitemapFetchResult } from "./crawl/sitemap.js";
 export type { PageAnalysis, SeoIssue, IssueSeverity } from "./seo/analyze.js";

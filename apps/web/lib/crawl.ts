@@ -1,5 +1,5 @@
 import "server-only";
-import { analyzePage, isPathAllowed, pageIssues, type SeoIssue } from "@rootspun/core";
+import { analyzePage, collectSitemapUrls, isPathAllowed, pageIssues, type SeoIssue } from "@rootspun/core";
 
 const UA = "RootspunBot/1.0 (+https://rootspun.app; technical SEO audit)";
 export const CRAWL_BOTS = ["Googlebot", "Google-Extended", "GPTBot", "PerplexityBot", "ClaudeBot", "Bingbot"];
@@ -23,17 +23,23 @@ export interface CrawlResult {
   pages: CrawledPage[];
 }
 
-async function fetchText(url: string, timeoutMs = 12000) {
+async function fetchText(url: string, timeoutMs = 12000, accept: "html" | "xml" = "html") {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), timeoutMs);
   try {
     const res = await fetch(url, {
-      headers: { "user-agent": UA, accept: "text/html,application/xhtml+xml" },
+      headers: {
+        "user-agent": UA,
+        accept: accept === "xml" ? "application/xml,text/xml,*/*" : "text/html,application/xhtml+xml",
+      },
       redirect: "follow",
       signal: ctl.signal,
     });
-    const ct = res.headers.get("content-type") ?? "";
-    return { status: res.status, text: ct.includes("html") ? await res.text() : "", finalUrl: res.url || url };
+    const ct = (res.headers.get("content-type") ?? "").toLowerCase();
+    // Sitemaps are served as XML (and some servers omit the content-type);
+    // only block clearly-binary bodies so sitemap <loc> parsing actually works.
+    const ok = accept === "xml" ? !/(image|font|octet-stream|pdf|zip)/.test(ct) : ct.includes("html");
+    return { status: res.status, text: ok ? await res.text() : "", finalUrl: res.url || url };
   } catch {
     return { status: 0, text: "", finalUrl: url };
   } finally {
@@ -51,23 +57,25 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
   const host = domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "").replace(/^www\./, "").toLowerCase();
   const origin = `https://${host}`;
 
-  const robots = await fetchText(`${origin}/robots.txt`);
+  const robots = await fetchText(`${origin}/robots.txt`, 12000, "xml");
   const robotsTxt = robots.status === 200 ? robots.text : "";
   const crawlerAccess = CRAWL_BOTS.map((bot) => ({ bot, allowed: isPathAllowed(robotsTxt, bot, "/") }));
-  const sitemap = await fetchText(`${origin}/sitemap.xml`);
-  const sitemapFound = sitemap.status === 200;
 
-  // Seed the crawl with the homepage plus any same-host URLs listed in the sitemap.
+  // Seed the crawl with the homepage plus any same-host page URLs in the sitemap.
   const queue: string[] = [`${origin}/`];
-  if (sitemapFound) {
-    for (const m of sitemap.text.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)) {
-      try {
-        const u = new URL(m[1]!);
-        if (u.host.replace(/^www\./, "") === host && queue.length < max * 6) queue.push(u.toString());
-      } catch {
-        /* skip bad url */
-      }
-    }
+  const sitemapUrls = await collectSitemapUrls(
+    origin,
+    host,
+    robotsTxt,
+    async (u) => {
+      const r = await fetchText(u, 12000, "xml");
+      return { status: r.status, text: r.text };
+    },
+    { limit: max * 6 },
+  );
+  const sitemapFound = sitemapUrls !== null;
+  for (const u of sitemapUrls ?? []) {
+    if (queue.length < max * 6) queue.push(u);
   }
   const visited = new Set<string>();
   const pages: CrawledPage[] = [];

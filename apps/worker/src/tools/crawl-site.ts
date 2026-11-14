@@ -6,7 +6,7 @@
  *
  *   pnpm --filter worker crawl-site -- --domain lifechangingjourney.co.za --max 8
  */
-import { analyzePage, isPathAllowed, pageIssues, type SeoIssue } from "@rootspun/core";
+import { analyzePage, collectSitemapUrls, isPathAllowed, pageIssues, type SeoIssue } from "@rootspun/core";
 
 const UA = "RootspunBot/1.0 (+https://rootspun.app; technical SEO audit)";
 const BOTS = ["Googlebot", "Google-Extended", "GPTBot", "PerplexityBot", "ClaudeBot", "Bingbot"];
@@ -26,17 +26,21 @@ function parseArgs(argv: string[]): Args {
   return { domain, max: Number(get("max") ?? 8) };
 }
 
-async function fetchText(url: string, timeoutMs = 15000) {
+async function fetchText(url: string, timeoutMs = 15000, accept: "html" | "xml" = "html") {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), timeoutMs);
   try {
     const res = await fetch(url, {
-      headers: { "user-agent": UA, accept: "text/html,application/xhtml+xml" },
+      headers: {
+        "user-agent": UA,
+        accept: accept === "xml" ? "application/xml,text/xml,*/*" : "text/html,application/xhtml+xml",
+      },
       redirect: "follow",
       signal: ctl.signal,
     });
-    const ct = res.headers.get("content-type") ?? "";
-    const text = ct.includes("html") ? await res.text() : "";
+    const ct = (res.headers.get("content-type") ?? "").toLowerCase();
+    const ok = accept === "xml" ? !/(image|font|octet-stream|pdf|zip)/.test(ct) : ct.includes("html");
+    const text = ok ? await res.text() : "";
     return { status: res.status, text, finalUrl: res.url || url };
   } catch (e) {
     return { status: 0, text: "", finalUrl: url, error: e instanceof Error ? e.message : String(e) };
@@ -66,8 +70,24 @@ async function main() {
     log(`  ${ok ? "✓ allowed" : "✗ BLOCKED"}  ${bot}`);
   }
 
+  // ── sitemap (seed the crawl from it, like the app crawler) ────────────────
+  const host = domain.replace(/^www\./, "");
+  const seededUrls = await collectSitemapUrls(
+    origin,
+    host,
+    robotsTxt,
+    async (u) => {
+      const r = await fetchText(u, 15000, "xml");
+      return { status: r.status, text: r.text };
+    },
+    { limit: max * 6 },
+  );
+  const sitemapFound = seededUrls !== null;
+  const seeded = seededUrls ?? [];
+  log(`\nsitemap: ${sitemapFound ? `found (${seeded.length} same-host page URLs)` : "not found"}`);
+
   // ── crawl ───────────────────────────────────────────────────────────────
-  const queue: string[] = [`${origin}/`];
+  const queue: string[] = [`${origin}/`, ...seeded];
   const visited = new Set<string>();
   const results: { url: string; status: number; issues: SeoIssue[]; title: string | null; words: number }[] = [];
 
@@ -108,7 +128,8 @@ async function main() {
   }
 
   // ── report ──────────────────────────────────────────────────────────────
-  log(`\nCrawled ${results.length} page(s):\n`);
+  const broken = results.filter((r) => r.status === 0 || r.status >= 400).length;
+  log(`\nCrawled ${results.length} page(s)${broken > 0 ? ` — ⚠ ${broken} broken (HTTP ≥400 or unreachable)` : ""}:\n`);
   for (const r of results) {
     const high = r.issues.filter((i) => i.severity === "high").length;
     const med = r.issues.filter((i) => i.severity === "medium").length;

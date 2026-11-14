@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
 // /portal is NOT public — client-viewers must be signed in; it is gated like the app.
-const PUBLIC_PREFIXES = ["/", "/sign-in", "/sign-up", "/auth", "/audit", "/api/public", "/api/webhooks"];
+const PUBLIC_PREFIXES = ["/", "/sign-in", "/sign-up", "/forgot", "/reset", "/auth", "/audit", "/api/public", "/api/webhooks"];
 
 /**
  * Refreshes the Supabase session on every request and gates the app routes.

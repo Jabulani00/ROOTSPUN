@@ -85,6 +85,13 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
               className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
+          {!isSignUp && (
+            <div className="text-right">
+              <Link href="/forgot" className="text-xs text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
+          )}
           {error && (
             <p role="alert" className="text-sm text-destructive">
               {error}

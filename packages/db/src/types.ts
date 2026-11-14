@@ -436,6 +436,7 @@ export interface Database {
       request_client_refresh: { Args: { p_client_id: string }; Returns: number };
       connect_gsc_integration: { Args: { p_client_id: string; p_refresh_token: string }; Returns: string };
       gsc_refresh_token: { Args: { p_integration_id: string }; Returns: string };
+      bootstrap_agency: { Args: { p_name: string }; Returns: string };
     };
     Enums: {
       app_role: AppRole;

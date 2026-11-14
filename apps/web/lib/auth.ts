@@ -29,17 +29,10 @@ export const ensureAgencyId = cache(async (): Promise<string | null> => {
     .maybeSingle();
   if (existing?.agency_id) return existing.agency_id;
 
-  // Bootstrap: create the agency, then the owner membership.
+  // Bootstrap via a SECURITY DEFINER function to avoid the RLS chicken-and-egg
+  // (can't read back a just-inserted agency before the membership exists).
   const agencyName = user.email ? `${user.email.split("@")[0]}'s agency` : "My agency";
-  const { data: agency, error: agencyErr } = await supabase
-    .from("agencies")
-    .insert({ name: agencyName })
-    .select("id")
-    .single();
-  if (agencyErr || !agency) return null;
-
-  await supabase
-    .from("memberships")
-    .insert({ agency_id: agency.id, user_id: user.id, role: "owner" });
-  return agency.id;
+  const { data: newId, error } = await supabase.rpc("bootstrap_agency", { p_name: agencyName });
+  if (error || !newId) return null;
+  return newId as string;
 });

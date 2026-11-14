@@ -28,14 +28,18 @@ async function run(label, sql) {
 try {
   await client.connect();
   const migDir = join(root, "supabase", "migrations");
-  const files = readdirSync(migDir).filter((f) => f.endsWith(".sql")).sort();
+  // Optional args: specific migration filenames to run (else all + seed).
+  const only = process.argv.slice(2);
+  const files = (only.length > 0 ? only : readdirSync(migDir).filter((f) => f.endsWith(".sql")).sort());
   for (const f of files) {
     await run(f, readFileSync(join(migDir, f), "utf8"));
   }
-  try {
-    await run("seed.sql", readFileSync(join(root, "supabase", "seed.sql"), "utf8"));
-  } catch (e) {
-    console.warn("seed skipped:", e.message);
+  if (only.length === 0) {
+    try {
+      await run("seed.sql", readFileSync(join(root, "supabase", "seed.sql"), "utf8"));
+    } catch (e) {
+      console.warn("seed skipped:", e.message);
+    }
   }
   console.log("\nAll migrations applied.");
 } catch (err) {

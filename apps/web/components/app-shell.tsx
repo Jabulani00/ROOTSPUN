@@ -6,6 +6,7 @@ import {
   Lightbulb,
   ListChecks,
   LogOut,
+  Search,
   Settings,
   Wrench,
 } from "lucide-react";
@@ -16,6 +17,7 @@ import { signOutAction } from "@/app/(app)/actions";
 const clientNav = (clientId: string) => [
   { href: `/clients/${clientId}/visibility`, label: "Visibility", icon: Gauge },
   { href: `/clients/${clientId}/prompts`, label: "Prompts", icon: ListChecks },
+  { href: `/clients/${clientId}/keywords`, label: "Keywords", icon: Search },
   { href: `/clients/${clientId}/technical`, label: "Technical", icon: BarChart3 },
   { href: `/clients/${clientId}/causes`, label: "Causes", icon: Lightbulb },
   { href: `/clients/${clientId}/fixes`, label: "Fixes", icon: Wrench },

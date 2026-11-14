@@ -31,7 +31,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <>
       <BrandStyle branding={branding} />
-      <AppShell agencies={agencies} clients={clientOptions} activeAgencyId={agencies[0]?.id}>
+      <AppShell
+        agencies={agencies}
+        clients={clientOptions}
+        activeAgencyId={agencies[0]?.id}
+        userEmail={user.email ?? undefined}
+      >
         {children}
       </AppShell>
     </>

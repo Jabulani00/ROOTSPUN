@@ -5,11 +5,13 @@ import {
   Gauge,
   Lightbulb,
   ListChecks,
+  LogOut,
   Settings,
   Wrench,
 } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { Switcher, type SwitcherOption } from "./switcher";
+import { signOutAction } from "@/app/(app)/actions";
 
 const clientNav = (clientId: string) => [
   { href: `/clients/${clientId}/visibility`, label: "Visibility", icon: Gauge },
@@ -25,12 +27,14 @@ export function AppShell({
   clients,
   activeAgencyId,
   activeClientId,
+  userEmail,
   children,
 }: {
   agencies: SwitcherOption[];
   clients: SwitcherOption[];
   activeAgencyId?: string;
   activeClientId?: string;
+  userEmail?: string;
   children: React.ReactNode;
 }) {
   const nav = activeClientId ? clientNav(activeClientId) : [];
@@ -60,6 +64,11 @@ export function AppShell({
           )}
         </div>
         <div className="ml-auto flex items-center gap-1">
+          {userEmail && (
+            <span className="mr-1 hidden text-sm text-muted-foreground sm:inline" title={userEmail}>
+              {userEmail}
+            </span>
+          )}
           <Link
             href="/settings"
             className="grid h-9 w-9 place-items-center rounded-md hover:bg-secondary"
@@ -68,6 +77,15 @@ export function AppShell({
             <Settings className="h-4 w-4" />
           </Link>
           <ThemeToggle />
+          <form action={signOutAction}>
+            <button
+              type="submit"
+              aria-label="Sign out"
+              className="grid h-9 w-9 place-items-center rounded-md hover:bg-secondary"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </form>
         </div>
       </header>
 

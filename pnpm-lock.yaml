@@ -41,6 +41,9 @@ importers:
       '@rootspun/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@rootspun/payments':
+        specifier: workspace:*
+        version: link:../../packages/payments
       '@rootspun/rules':
         specifier: workspace:*
         version: link:../../packages/rules

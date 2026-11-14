@@ -271,6 +271,18 @@ export interface Database {
         Update: Partial<{ status: string; result: Record<string, unknown> | null }>;
         Relationships: [];
       };
+      subscriptions: {
+        Row: Row<{
+          agency_id: string;
+          provider: "paystack" | "stripe";
+          plan: AgencyPlan;
+          status: string;
+          period_end: string | null;
+        }>;
+        Insert: { agency_id: string; provider: "paystack" | "stripe"; plan?: AgencyPlan; status?: string; period_end?: string | null };
+        Update: Partial<{ provider: "paystack" | "stripe"; plan: AgencyPlan; status: string; period_end: string | null }>;
+        Relationships: [];
+      };
       api_keys: {
         Row: Row<{
           id: string;

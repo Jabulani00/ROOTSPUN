@@ -23,12 +23,15 @@ function requireEnv(name: string): string {
  * tenant isolation, so this is safe to run client-side (NFR-01).
  */
 export function browserClient(): RootspunClient {
-  return asClient(
-    createBrowserClient<Database>(
-      requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-      requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
-    ),
-  );
+  // These MUST be static `process.env.NEXT_PUBLIC_*` references so Next.js inlines
+  // them into the browser bundle at build time — dynamic access (process.env[name])
+  // is left undefined in the browser.
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anon) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  }
+  return asClient(createBrowserClient<Database>(url, anon));
 }
 
 /**

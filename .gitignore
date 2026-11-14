@@ -16,10 +16,12 @@ coverage/
 playwright-report/
 test-results/
 
-# env
+# env / secrets (never commit)
 .env
 .env.local
 .env*.local
+ROOTSPUN env.txt
+*env*.txt
 
 # supabase
 supabase/.branches/

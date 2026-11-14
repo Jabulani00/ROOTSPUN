@@ -6,7 +6,7 @@ const sections = [
   { title: "Branding", desc: "Logo and colours for white-label.", href: "/settings/branding" },
   { title: "Integrations", desc: "Connect Google Search Console and others.", href: "/settings/integrations" },
   { title: "API", desc: "Public REST API keys and OpenAPI docs.", href: "/settings/api" },
-  { title: "Billing", desc: "Plan, usage and top-ups (phase 4).", href: null },
+  { title: "Billing", desc: "Plans, subscription and usage.", href: "/settings/billing" },
 ] as const;
 
 export default function SettingsPage() {

@@ -13,6 +13,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const isSignUp = mode === "sign-up";
@@ -20,13 +21,19 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setNotice(null);
     setLoading(true);
     const supabase = createClient();
-    const { error } = isSignUp
+    const result = isSignUp
       ? await supabase.auth.signUp({ email, password })
       : await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) return setError(error.message);
+    if (result.error) return setError(result.error.message);
+    // On sign-up with email confirmation enabled there is no session yet.
+    if (isSignUp && !result.data.session) {
+      setNotice("Account created — check your email to confirm, then sign in.");
+      return;
+    }
     router.push(next as never);
     router.refresh();
   }
@@ -81,6 +88,11 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           {error && (
             <p role="alert" className="text-sm text-destructive">
               {error}
+            </p>
+          )}
+          {notice && (
+            <p role="status" className="text-sm text-success">
+              {notice}
             </p>
           )}
           <Button type="submit" className="w-full" disabled={loading}>

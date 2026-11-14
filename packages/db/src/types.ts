@@ -338,6 +338,7 @@ export interface Database {
           nosnippet: boolean;
           rendered_diff: number | null;
           template: string | null;
+          issues: { severity: string; code: string; message: string }[];
         }>;
         Insert: {
           agency_id: string;
@@ -349,6 +350,7 @@ export interface Database {
           nosnippet?: boolean;
           rendered_diff?: number | null;
           template?: string | null;
+          issues?: { severity: string; code: string; message: string }[];
         };
         Update: Partial<{ status: number | null; canonical: string | null }>;
         Relationships: [];

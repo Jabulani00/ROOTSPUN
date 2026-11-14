@@ -48,6 +48,7 @@ export async function runCrawlAction(clientId: string): Promise<{ error?: string
         canonical: p.canonical,
         nosnippet: p.nosnippet,
         template: p.template,
+        issues: p.issues,
       })),
     );
   }

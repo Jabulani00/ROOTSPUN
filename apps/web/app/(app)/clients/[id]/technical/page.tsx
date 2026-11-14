@@ -17,10 +17,24 @@ export default async function TechnicalPage({ params }: { params: { id: string }
   const { data: pages } = crawl
     ? await supabase
         .from("pages")
-        .select("url, status, canonical, nosnippet, template")
+        .select("url, status, canonical, nosnippet, template, issues")
         .eq("crawl_id", crawl.id)
         .limit(50)
     : { data: [] };
+
+  // Aggregate technical-SEO issues across the crawl.
+  const agg = new Map<string, { severity: string; message: string; n: number }>();
+  for (const p of pages ?? []) {
+    for (const i of (p.issues ?? []) as { severity: string; code: string; message: string }[]) {
+      const e = agg.get(i.code) ?? { severity: i.severity, message: i.message, n: 0 };
+      e.n += 1;
+      agg.set(i.code, e);
+    }
+  }
+  const sevRank: Record<string, number> = { high: 0, medium: 1, low: 2 };
+  const topIssues = [...agg.values()].sort(
+    (a, b) => (sevRank[a.severity] ?? 3) - (sevRank[b.severity] ?? 3) || b.n - a.n,
+  );
 
   const { data: access } = await supabase
     .from("crawler_access")
@@ -67,6 +81,36 @@ export default async function TechnicalPage({ params }: { params: { id: string }
 
           <Card>
             <CardHeader>
+              <CardTitle>Technical SEO issues</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {topIssues.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No on-page issues detected. 🎉</p>
+              ) : (
+                <ul className="space-y-1.5 text-sm">
+                  {topIssues.slice(0, 14).map((i) => (
+                    <li key={i.message} className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "w-14 shrink-0 rounded px-1.5 py-0.5 text-center text-xs uppercase",
+                          i.severity === "high" && "bg-destructive/15 text-destructive",
+                          i.severity === "medium" && "bg-primary/15 text-primary",
+                          i.severity === "low" && "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {i.severity}
+                      </span>
+                      <span className="tabular-nums text-muted-foreground">{i.n}×</span>
+                      <span>{i.message}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Pages ({crawl.page_count})</CardTitle>
             </CardHeader>
             <CardContent>
@@ -79,6 +123,7 @@ export default async function TechnicalPage({ params }: { params: { id: string }
                       <th className="px-2 py-1 font-medium">Template</th>
                       <th className="px-2 py-1 font-medium">Canonical</th>
                       <th className="px-2 py-1 font-medium">nosnippet</th>
+                      <th className="px-2 py-1 font-medium">Issues</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -96,6 +141,9 @@ export default async function TechnicalPage({ params }: { params: { id: string }
                           <td className="px-2 py-1 text-muted-foreground">{p.template}</td>
                           <td className="px-2 py-1">{p.canonical ? "✓" : "—"}</td>
                           <td className="px-2 py-1">{p.nosnippet ? "⚠" : "—"}</td>
+                          <td className="px-2 py-1 tabular-nums text-muted-foreground">
+                            {((p.issues ?? []) as unknown[]).length || "—"}
+                          </td>
                         </tr>
                       );
                     })}

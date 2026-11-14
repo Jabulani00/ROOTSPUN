@@ -312,6 +312,47 @@ export interface Database {
         Update: Partial<{ scopes: string[]; last_used_at: string | null }>;
         Relationships: [];
       };
+      crawls: {
+        Row: Row<{
+          id: string;
+          agency_id: string;
+          client_id: string;
+          started_at: string;
+          finished_at: string | null;
+          page_count: number;
+          status: string;
+        }>;
+        Insert: { agency_id: string; client_id: string; page_count?: number; status?: string; finished_at?: string | null };
+        Update: Partial<{ finished_at: string | null; page_count: number; status: string }>;
+        Relationships: [];
+      };
+      pages: {
+        Row: Row<{
+          id: string;
+          agency_id: string;
+          crawl_id: string;
+          url: string;
+          status: number | null;
+          canonical: string | null;
+          robots: string | null;
+          nosnippet: boolean;
+          rendered_diff: number | null;
+          template: string | null;
+        }>;
+        Insert: {
+          agency_id: string;
+          crawl_id: string;
+          url: string;
+          status?: number | null;
+          canonical?: string | null;
+          robots?: string | null;
+          nosnippet?: boolean;
+          rendered_diff?: number | null;
+          template?: string | null;
+        };
+        Update: Partial<{ status: number | null; canonical: string | null }>;
+        Relationships: [];
+      };
       cwv_metrics: {
         Row: Row<{
           id: string;

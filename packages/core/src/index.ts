@@ -38,6 +38,8 @@ export type { HtmlSignals } from "./crawl/html.js";
 export { analyzePage, pageIssues, isExpectedNoindexPath } from "./seo/analyze.js";
 export { analyzeAeo, aeoSignals } from "./seo/aeo.js";
 export type { AeoResult, AeoSignals, AeoRecommendation } from "./seo/aeo.js";
+export { auditOnPage } from "./seo/onpage.js";
+export type { OnPageRecord, SiteAudit, DuplicateGroup, CanonicalIssue } from "./seo/onpage.js";
 export { analyzeKeyword, rankKeywords } from "./keywords/rank.js";
 export type { KeywordInput, KeywordRank, KeywordSummary, RankBucket, SerpResult } from "./keywords/rank.js";
 export { collectSitemapUrls, sitemapLocs, sitemapUrlsFromRobots } from "./crawl/sitemap.js";

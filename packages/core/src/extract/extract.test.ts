@@ -3,6 +3,7 @@ import {
   extractAnswer,
   extractCitations,
   extractMentions,
+  extractUrlsFromText,
   normalizeHost,
 } from "./extract.js";
 import { scoreSentiment, windowAround } from "./sentiment.js";
@@ -83,6 +84,27 @@ describe("windowAround", () => {
   });
 });
 
+describe("extractUrlsFromText", () => {
+  it("pulls markdown-link and bare URLs, trims punctuation, dedupes", () => {
+    const text =
+      "See [Acme](https://acme.com/guide) for details. Also https://rival.com/post, and visit https://acme.com/guide again.";
+    expect(extractUrlsFromText(text)).toEqual([
+      "https://acme.com/guide",
+      "https://rival.com/post",
+    ]);
+  });
+
+  it("strips a trailing bracket/period from a bare URL", () => {
+    expect(extractUrlsFromText("ranked best (https://acme.com/x).")).toEqual([
+      "https://acme.com/x",
+    ]);
+  });
+
+  it("ignores non-URL text", () => {
+    expect(extractUrlsFromText("no links here, just acme.com mentioned")).toEqual([]);
+  });
+});
+
 describe("extractAnswer", () => {
   it("combines mentions and citations", () => {
     const result = extractAnswer({
@@ -98,5 +120,30 @@ describe("extractAnswer", () => {
     expect(result.mentions[0]?.entity).toBe("client");
     expect(result.citations).toHaveLength(2);
     expect(result.citations[0]?.isClient).toBe(true);
+  });
+
+  it("auto-discovers inline citations when asked and merges with the given list", () => {
+    const result = extractAnswer({
+      text: "Acme leads the market — [source](https://acme.com/report) and https://rival.com/review.",
+      citedUrls: ["https://acme.com/report"], // provider gave one; the review is inline-only
+      clientHosts: ["acme.com"],
+      entities: [{ entity: "client", terms: ["Acme"] }],
+      autoDiscoverUrls: true,
+    });
+    // acme.com/report not duplicated; rival.com recovered from the text
+    expect(result.citations).toEqual([
+      { host: "acme.com", isClient: true, rank: 1 },
+      { host: "rival.com", isClient: false, rank: 2 },
+    ]);
+  });
+
+  it("leaves citations untouched when autoDiscoverUrls is off", () => {
+    const result = extractAnswer({
+      text: "Acme leads — https://rival.com/review.",
+      citedUrls: ["https://acme.com/report"],
+      clientHosts: ["acme.com"],
+      entities: [{ entity: "client", terms: ["Acme"] }],
+    });
+    expect(result.citations).toHaveLength(1);
   });
 });

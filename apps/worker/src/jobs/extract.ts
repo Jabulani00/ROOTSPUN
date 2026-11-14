@@ -38,6 +38,9 @@ export async function runExtractJob(job: ExtractJob, ctx: JobContext): Promise<v
     citedUrls: job.citedUrls,
     clientHosts,
     entities,
+    // Engines like Perplexity/ChatGPT often cite inline rather than via a
+    // structured list — recover those URLs from the answer text too.
+    autoDiscoverUrls: true,
   });
 
   if (mentions.length > 0) {

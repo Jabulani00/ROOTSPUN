@@ -17,7 +17,7 @@ export * as seo from "./seo/index.js";
 export { scoreSlice, unifiedVisibilityScore, shareOfVoice, promptVisibility } from "./scoring/uvs.js";
 export { diagnose, mostLikelyCause, impactScore } from "./why/diagnose.js";
 export type { LossContext, Cause, CauseType, CauseEvidence } from "./why/types.js";
-export { extractAnswer, extractMentions, extractCitations, normalizeHost } from "./extract/extract.js";
+export { extractAnswer, extractMentions, extractCitations, extractUrlsFromText, normalizeHost } from "./extract/extract.js";
 export type { ExtractInput, ExtractResult, EntityTerms } from "./extract/extract.js";
 export { evaluateScoreDrop, DEFAULT_DROP_THRESHOLD, type AlertDecision } from "./alerts/alerts.js";
 export { checkBrief } from "./guardrail/guardrail.js";

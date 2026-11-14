@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyzePage, pageIssues } from "./analyze.js";
+import { analyzePage, pageIssues, isExpectedNoindexPath } from "./analyze.js";
 
 const goodPage = `
 <html><head>
@@ -47,6 +47,30 @@ describe("analyzePage", () => {
   it("flags noindex as high severity", () => {
     const p = analyzePage(`<meta name="robots" content="noindex">`, "https://x.co/");
     expect(pageIssues(p).some((i) => i.code === "noindex" && i.severity === "high")).toBe(true);
+  });
+
+  it("treats noindex on a cart/checkout/account page as expected, not critical", () => {
+    const noindex = `<meta name="robots" content="noindex">`;
+    for (const u of [
+      "https://shop.co.za/cart-2/",
+      "https://shop.co.za/checkout/",
+      "https://shop.co.za/my-account/",
+      "https://shop.co.za/wishlist/",
+    ]) {
+      const issues = pageIssues(analyzePage(noindex, u));
+      expect(issues.some((i) => i.code === "noindex" && i.severity === "high")).toBe(false);
+      expect(issues.some((i) => i.code === "noindex_expected" && i.severity === "low")).toBe(true);
+      // and it should not nag about thin content on a utility page
+      expect(issues.some((i) => i.code === "thin_content")).toBe(false);
+    }
+  });
+
+  it("isExpectedNoindexPath matches utility paths but not content pages", () => {
+    expect(isExpectedNoindexPath("https://shop.co.za/cart-2/")).toBe(true);
+    expect(isExpectedNoindexPath("https://shop.co.za/my-account/orders")).toBe(true);
+    expect(isExpectedNoindexPath("/checkout/")).toBe(true);
+    expect(isExpectedNoindexPath("https://shop.co.za/products/drill")).toBe(false);
+    expect(isExpectedNoindexPath("https://shop.co.za/about")).toBe(false);
   });
 
   it("is clean on a well-optimized page", () => {

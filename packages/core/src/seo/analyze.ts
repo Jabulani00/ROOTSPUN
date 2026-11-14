@@ -118,13 +118,37 @@ export function analyzePage(html: string, url: string): PageAnalysis {
   };
 }
 
+/**
+ * Utility pages that are *meant* to be noindex (carts, checkout, account,
+ * login, search results, etc.). Google's own guidance is to keep these out of
+ * the index, so a noindex here is correct, not a defect — flagging it "high"
+ * creates false alarms on every WooCommerce/Shopify store. Matched on the URL
+ * path so it works across platforms (/cart-2/, /my-account/, /checkout/…).
+ */
+const EXPECTED_NOINDEX_PATH =
+  /(^|\/)(cart|carts|checkout|basket|bag|my-account|account|login|signin|sign-in|register|signup|sign-up|logout|wishlist|wishlists|order-received|order-tracking|thank-you|thankyou|password-reset|lost-password|search)(\/|-|$)/i;
+
+export function isExpectedNoindexPath(url: string): boolean {
+  let path = url;
+  try {
+    path = new URL(url).pathname;
+  } catch {
+    /* treat the raw string as a path */
+  }
+  return EXPECTED_NOINDEX_PATH.test(path);
+}
+
 /** Turn an analysis into ranked technical-SEO issues. */
 export function pageIssues(a: PageAnalysis): SeoIssue[] {
   const issues: SeoIssue[] = [];
   const add = (severity: IssueSeverity, code: string, message: string) =>
     issues.push({ severity, code, message });
 
-  if (a.noindex) add("high", "noindex", "Page is set to noindex — it will not rank in Google");
+  if (a.noindex) {
+    if (isExpectedNoindexPath(a.url))
+      add("low", "noindex_expected", "noindex on a utility page (cart/checkout/account) — expected, confirm it's intentional");
+    else add("high", "noindex", "Page is set to noindex — it will not rank in Google");
+  }
   if (a.nosnippet) add("medium", "nosnippet", "nosnippet set — AI Overviews/answers can't quote this page");
 
   if (!a.title) add("high", "title_missing", "Missing <title>");
@@ -138,7 +162,8 @@ export function pageIssues(a: PageAnalysis): SeoIssue[] {
   if (a.h1Count === 0) add("medium", "h1_missing", "No <h1> heading");
   else if (a.h1Count > 1) add("low", "h1_multiple", `${a.h1Count} <h1> headings (prefer one)`);
 
-  if (a.wordCount < 300) add("medium", "thin_content", `Thin content (~${a.wordCount} words)`);
+  if (a.wordCount < 300 && !isExpectedNoindexPath(a.url))
+    add("medium", "thin_content", `Thin content (~${a.wordCount} words)`);
   if (a.imagesMissingAlt > 0) add("low", "img_alt", `${a.imagesMissingAlt} image(s) missing alt text`);
   if (!a.canonical) add("low", "canonical_missing", "No canonical link");
   if (!a.hasJsonLd) add("low", "no_structured_data", "No JSON-LD structured data (helps AI + rich results)");

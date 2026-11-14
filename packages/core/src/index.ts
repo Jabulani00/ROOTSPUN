@@ -34,5 +34,5 @@ export { isPathAllowed, parseRobots } from "./robots/robots.js";
 export type { RobotsGroup, RobotsRule } from "./robots/robots.js";
 export { extractHtmlSignals, renderedVsRawDiff } from "./crawl/html.js";
 export type { HtmlSignals } from "./crawl/html.js";
-export { analyzePage, pageIssues } from "./seo/analyze.js";
+export { analyzePage, pageIssues, isExpectedNoindexPath } from "./seo/analyze.js";
 export type { PageAnalysis, SeoIssue, IssueSeverity } from "./seo/analyze.js";

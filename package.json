@@ -17,7 +17,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "db:types": "supabase gen types typescript --local > packages/db/src/types.ts",
     "db:reset": "supabase db reset",
-    "db:remote": "node scripts/apply-remote.mjs"
+    "db:remote": "node scripts/apply-remote.mjs",
+    "rls:test": "node scripts/rls-test.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",

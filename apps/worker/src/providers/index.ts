@@ -4,6 +4,7 @@ import { ProviderNotConfiguredError, type SerpProvider } from "./types.js";
 import { openAiCompatibleProvider } from "./llm-openai.js";
 import { anthropicProvider } from "./llm-anthropic.js";
 import { dataForSeoProvider } from "./serp-dataforseo.js";
+import { googleCseProvider } from "./serp-google-cse.js";
 
 export * from "./types.js";
 
@@ -14,6 +15,7 @@ export * from "./types.js";
  * silently producing empty data.
  */
 export function getSerpProvider(env: WorkerEnv): SerpProvider {
+  if (env.SERP_PROVIDER === "google_cse") return googleCseProvider(env);
   if (env.SERP_PROVIDER === "dataforseo") return dataForSeoProvider(env);
   // TODO: SerpApi adapter behind the same interface (swappable per the risk plan).
   return {

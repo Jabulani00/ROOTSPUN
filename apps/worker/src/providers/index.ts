@@ -1,11 +1,9 @@
 import type { EngineCode } from "@rootspun/core";
 import type { WorkerEnv } from "../env.js";
-import {
-  ProviderNotConfiguredError,
-  type LlmAnswer,
-  type LlmProvider,
-  type SerpProvider,
-} from "./types.js";
+import { ProviderNotConfiguredError, type SerpProvider } from "./types.js";
+import { openAiCompatibleProvider } from "./llm-openai.js";
+import { anthropicProvider } from "./llm-anthropic.js";
+import { dataForSeoProvider } from "./serp-dataforseo.js";
 
 export * from "./types.js";
 
@@ -16,7 +14,8 @@ export * from "./types.js";
  * silently producing empty data.
  */
 export function getSerpProvider(env: WorkerEnv): SerpProvider {
-  // TODO(phase1): implement DataForSEO / SerpApi adapters behind this interface.
+  if (env.SERP_PROVIDER === "dataforseo") return dataForSeoProvider(env);
+  // TODO: SerpApi adapter behind the same interface (swappable per the risk plan).
   return {
     name: env.SERP_PROVIDER,
     async run() {
@@ -25,20 +24,20 @@ export function getSerpProvider(env: WorkerEnv): SerpProvider {
   };
 }
 
-const LLM_KEY_BY_ENGINE: Partial<Record<EngineCode, keyof WorkerEnv>> = {
-  chatgpt: "OPENAI_API_KEY",
-  gemini: "GEMINI_API_KEY",
-  perplexity: "PERPLEXITY_API_KEY",
-};
+/** OpenAI-compatible engines (ChatGPT, Perplexity, Gemini). */
+const OPENAI_COMPATIBLE: EngineCode[] = ["chatgpt", "perplexity", "gemini"];
 
-export function getLlmProvider(engine: EngineCode, env: WorkerEnv): LlmProvider {
-  const keyName = LLM_KEY_BY_ENGINE[engine];
-  const configured = keyName ? Boolean(env[keyName]) : false;
+export function getLlmProvider(engine: EngineCode, env: WorkerEnv) {
+  if (OPENAI_COMPATIBLE.includes(engine)) {
+    return openAiCompatibleProvider(engine, env);
+  }
+  if (engine === "claude") {
+    return anthropicProvider(engine, env);
+  }
+  // copilot: licensed provider in a later phase.
   return {
     engine,
-    async sample(): Promise<LlmAnswer> {
-      if (!configured) throw new ProviderNotConfiguredError(engine);
-      // TODO(phase1): call the engine's API (OpenAI SDK; Perplexity is OpenAI-compatible).
+    async sample() {
       throw new ProviderNotConfiguredError(engine);
     },
   };

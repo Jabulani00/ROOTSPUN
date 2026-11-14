@@ -15,7 +15,9 @@
     "@rootspun/core": "workspace:*",
     "@rootspun/db": "workspace:*",
     "@rootspun/rules": "workspace:*",
+    "@anthropic-ai/sdk": "^0.65.0",
     "@supabase/supabase-js": "^2.45.4",
+    "openai": "^4.68.4",
     "pino": "^9.5.0",
     "zod": "^3.23.8"
   },

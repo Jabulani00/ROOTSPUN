@@ -1,11 +1,42 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants, Card, CardContent, CardHeader, CardTitle, StatCard } from "@rootspun/ui";
+import { OnboardingChecklist, type ChecklistStep } from "@/components/onboarding-checklist";
 
 export default async function DashboardPage() {
   const supabase = createClient();
   const { data: clients } = await supabase.from("clients").select("id, name");
   const clientCount = clients?.length ?? 0;
+  const firstClientId = clients?.[0]?.id;
+
+  // Onboarding state (RS-408): count across the agency (RLS-scoped).
+  const [{ count: promptCount }, { count: gscCount }, { count: scoreCount }] = await Promise.all([
+    supabase.from("prompts").select("id", { count: "exact", head: true }),
+    supabase.from("integrations").select("id", { count: "exact", head: true }).eq("provider", "gsc"),
+    supabase.from("scores_daily").select("id", { count: "exact", head: true }),
+  ]);
+
+  const steps: ChecklistStep[] = [
+    { label: "Add your first client", done: clientCount > 0, href: "/clients/new", hint: "Domains, brand terms and competitors." },
+    {
+      label: "Build a prompt set",
+      done: (promptCount ?? 0) > 0,
+      href: firstClientId ? `/clients/${firstClientId}/prompts` : "/clients/new",
+      hint: "Import a CSV or add the questions buyers ask.",
+    },
+    {
+      label: "Connect Search Console",
+      done: (gscCount ?? 0) > 0,
+      href: "/settings",
+      hint: "Put real clicks next to visibility.",
+    },
+    {
+      label: "Run your first check",
+      done: (scoreCount ?? 0) > 0,
+      href: firstClientId ? `/clients/${firstClientId}/visibility` : "/clients/new",
+      hint: "See your Unified Visibility Score across engines.",
+    },
+  ];
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -15,6 +46,8 @@ export default async function DashboardPage() {
           Add client
         </Link>
       </div>
+
+      <OnboardingChecklist steps={steps} />
 
       {clientCount === 0 ? (
         <Card>
@@ -34,8 +67,8 @@ export default async function DashboardPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-3">
           <StatCard label="Clients tracked" value={String(clientCount)} />
-          <StatCard label="Avg. visibility (UVS)" value="—" confidence="low" />
-          <StatCard label="Prompt runs today" value="—" />
+          <StatCard label="Prompts tracked" value={String(promptCount ?? 0)} />
+          <StatCard label="Days scored" value={String(scoreCount ?? 0)} />
         </div>
       )}
     </div>

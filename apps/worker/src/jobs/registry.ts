@@ -13,6 +13,8 @@ import { runDocsWatchJob, docsWatchJobSchema } from "./docs-watch.js";
 import { runReportPdfJob, reportPdfJobSchema } from "./report-pdf.js";
 import { runAlertEvalJob, alertEvalJobSchema } from "./alert-eval.js";
 import { runProofEvalJob, proofEvalJobSchema } from "./proof-eval.js";
+import { runSubquestionMapJob, subquestionMapJobSchema } from "./subquestion-map.js";
+import { runEntityCheckJob, entityCheckJobSchema } from "./entity-check.js";
 
 /** Union of every job message the worker understands. */
 export const jobMessageSchema = z.discriminatedUnion("type", [
@@ -29,6 +31,8 @@ export const jobMessageSchema = z.discriminatedUnion("type", [
   reportPdfJobSchema,
   alertEvalJobSchema,
   proofEvalJobSchema,
+  subquestionMapJobSchema,
+  entityCheckJobSchema,
 ]);
 export type JobMessage = z.infer<typeof jobMessageSchema>;
 export type JobType = JobMessage["type"];
@@ -67,5 +71,9 @@ export async function dispatch(raw: unknown, ctx: JobContext): Promise<void> {
       return runAlertEvalJob(job, ctx);
     case "proof_eval":
       return runProofEvalJob(job, ctx);
+    case "subquestion_map":
+      return runSubquestionMapJob(job, ctx);
+    case "entity_check":
+      return runEntityCheckJob(job, ctx);
   }
 }

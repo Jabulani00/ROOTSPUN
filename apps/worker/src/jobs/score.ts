@@ -62,14 +62,27 @@ export async function runScoreJob(job: ScoreJob, ctx: JobContext): Promise<void>
     const promptRuns = (runs ?? []).filter((r) => r.prompt_id === p.id);
     const samples: Sample[] = promptRuns.map((r) => {
       const engine = engineCode.get(r.engine_id) ?? "chatgpt";
+      const runCitations = citationsByRun.get(r.id) ?? [];
+
+      // For Google organic, the client's rank is stored as its client citation's
+      // rank; feed it to scoring as organicRank so position visibility applies.
+      let organicRank: number | null = null;
+      if (engine === "google_organic") {
+        const clientRanks = runCitations
+          .filter((c) => c.is_client && typeof c.rank === "number")
+          .map((c) => c.rank as number);
+        organicRank = clientRanks.length > 0 ? Math.min(...clientRanks) : null;
+      }
+
       return {
         engine,
+        organicRank,
         mentions: (mentionsByRun.get(r.id) ?? []).map((m) => ({
           entity: m.entity === "client" ? ("client" as const) : m.entity,
           position: m.position ?? 1,
           sentiment: (m.sentiment ?? "neutral") as Sentiment,
         })),
-        citations: (citationsByRun.get(r.id) ?? []).map((c) => ({
+        citations: runCitations.map((c) => ({
           host: c.host,
           isClient: c.is_client,
           rank: c.rank ?? 1,

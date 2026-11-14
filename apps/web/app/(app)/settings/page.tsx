@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@rootspun/ui";
 const sections = [
   { title: "Team", desc: "Invite members and assign roles (owner, admin, analyst, client viewer).", href: null },
   { title: "Branding", desc: "Logo and colours for white-label.", href: "/settings/branding" },
-  { title: "Integrations", desc: "Connect Google Search Console and others.", href: null },
+  { title: "Integrations", desc: "Connect Google Search Console and others.", href: "/settings/integrations" },
   { title: "API", desc: "Public REST API keys and OpenAPI docs.", href: "/settings/api" },
   { title: "Billing", desc: "Plan, usage and top-ups (phase 4).", href: null },
 ] as const;

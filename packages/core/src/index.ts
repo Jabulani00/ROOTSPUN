@@ -7,6 +7,10 @@ export * as guardrail from "./guardrail/index.js";
 export * as proof from "./proof/index.js";
 export * as api from "./api/index.js";
 export * as brand from "./brand/index.js";
+export * as coverage from "./coverage/index.js";
+export * as facts from "./facts/index.js";
+export * as robots from "./robots/index.js";
+export * as crawl from "./crawl/index.js";
 
 // Convenience re-exports of the most common entry points.
 export { scoreSlice, unifiedVisibilityScore, shareOfVoice, promptVisibility } from "./scoring/uvs.js";
@@ -21,3 +25,11 @@ export { computeLift, rankFixTypesByLift, windowElapsed, MEASUREMENT_WINDOWS_DAY
 export type { LiftInput, LiftResult, LiftMetric, FixTypeLift, RankedFixType } from "./proof/proof.js";
 export { hasScope, parseBearer, validateScopes, API_SCOPES, type ApiScope } from "./api/scopes.js";
 export { hexToHslTriplet, brandCssVars, brandCssRule, luminance, type Branding } from "./brand/brand.js";
+export { mapSubQuestions, COVERAGE_THRESHOLD } from "./coverage/coverage.js";
+export type { CoveragePage, SubQuestionMatch, CoverageResult } from "./coverage/coverage.js";
+export { compareFacts, valuesAgree } from "./facts/facts.js";
+export type { ObservedFact, FactIssue, FactComparison } from "./facts/facts.js";
+export { isPathAllowed, parseRobots } from "./robots/robots.js";
+export type { RobotsGroup, RobotsRule } from "./robots/robots.js";
+export { extractHtmlSignals, renderedVsRawDiff } from "./crawl/html.js";
+export type { HtmlSignals } from "./crawl/html.js";

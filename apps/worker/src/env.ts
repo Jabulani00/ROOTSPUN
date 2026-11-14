@@ -9,6 +9,7 @@ const schema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
   PERPLEXITY_API_KEY: z.string().optional(),
+  ANTHROPIC_API_KEY: z.string().optional(),
   SERP_PROVIDER: z.enum(["dataforseo", "serpapi"]).default("dataforseo"),
   LOG_LEVEL: z.enum(["trace", "debug", "info", "warn", "error"]).default("info"),
 });

@@ -284,6 +284,45 @@ export interface Database {
         Update: Partial<{ scopes: string[]; last_used_at: string | null }>;
         Relationships: [];
       };
+      cwv_metrics: {
+        Row: Row<{
+          id: string;
+          agency_id: string;
+          client_id: string;
+          template: string;
+          lcp_ms: number | null;
+          inp_ms: number | null;
+          cls: number | null;
+          source: "crux" | "psi";
+          date: string;
+        }>;
+        Insert: {
+          agency_id: string;
+          client_id: string;
+          template: string;
+          lcp_ms?: number | null;
+          inp_ms?: number | null;
+          cls?: number | null;
+          source: "crux" | "psi";
+          date?: string;
+        };
+        Update: Partial<{ lcp_ms: number | null; inp_ms: number | null; cls: number | null }>;
+        Relationships: [];
+      };
+      crawler_access: {
+        Row: Row<{
+          id: string;
+          agency_id: string;
+          client_id: string;
+          bot: string;
+          allowed: boolean;
+          blocked_by: string | null;
+          checked_at: string;
+        }>;
+        Insert: { agency_id: string; client_id: string; bot: string; allowed: boolean; blocked_by?: string | null };
+        Update: Partial<{ allowed: boolean; blocked_by: string | null }>;
+        Relationships: [];
+      };
       fix_outcomes: {
         Row: Row<{
           id: string;
@@ -296,6 +335,45 @@ export interface Database {
         }>;
         Insert: { agency_id: string; fix_id: string; metric: string; before?: number | null; after?: number | null; window_days?: number };
         Update: Partial<{ before: number | null; after: number | null; window_days: number }>;
+        Relationships: [];
+      };
+      integrations: {
+        Row: Row<{
+          id: string;
+          agency_id: string;
+          client_id: string | null;
+          provider: "gsc" | "ga4";
+          vault_secret_id: string | null;
+          status: string;
+          created_at: string;
+        }>;
+        Insert: { agency_id: string; client_id?: string | null; provider: "gsc" | "ga4"; vault_secret_id?: string | null; status?: string };
+        Update: Partial<{ status: string; vault_secret_id: string | null }>;
+        Relationships: [];
+      };
+      gsc_daily: {
+        Row: Row<{
+          id: string;
+          agency_id: string;
+          client_id: string;
+          date: string;
+          query: string | null;
+          page: string | null;
+          clicks: number;
+          impressions: number;
+          position: number | null;
+        }>;
+        Insert: {
+          agency_id: string;
+          client_id: string;
+          date: string;
+          query?: string | null;
+          page?: string | null;
+          clicks?: number;
+          impressions?: number;
+          position?: number | null;
+        };
+        Update: Partial<{ clicks: number; impressions: number; position: number | null }>;
         Relationships: [];
       };
       reports: {
@@ -344,6 +422,8 @@ export interface Database {
       current_agency_ids: { Args: Record<string, never>; Returns: string[] };
       is_agency_member: { Args: { target: string }; Returns: boolean };
       request_client_refresh: { Args: { p_client_id: string }; Returns: number };
+      connect_gsc_integration: { Args: { p_client_id: string; p_refresh_token: string }; Returns: string };
+      gsc_refresh_token: { Args: { p_integration_id: string }; Returns: string };
     };
     Enums: {
       app_role: AppRole;

@@ -323,8 +323,9 @@ export interface Database {
           status: string;
           robots_found: boolean | null;
           sitemap_found: boolean | null;
+          aeo_score: number | null;
         }>;
-        Insert: { agency_id: string; client_id: string; page_count?: number; status?: string; finished_at?: string | null; robots_found?: boolean | null; sitemap_found?: boolean | null };
+        Insert: { agency_id: string; client_id: string; page_count?: number; status?: string; finished_at?: string | null; robots_found?: boolean | null; sitemap_found?: boolean | null; aeo_score?: number | null };
         Update: Partial<{ finished_at: string | null; page_count: number; status: string }>;
         Relationships: [];
       };
@@ -341,6 +342,7 @@ export interface Database {
           rendered_diff: number | null;
           template: string | null;
           issues: { severity: string; code: string; message: string }[];
+          aeo_score: number | null;
         }>;
         Insert: {
           agency_id: string;
@@ -353,6 +355,7 @@ export interface Database {
           rendered_diff?: number | null;
           template?: string | null;
           issues?: { severity: string; code: string; message: string }[];
+          aeo_score?: number | null;
         };
         Update: Partial<{ status: number | null; canonical: string | null }>;
         Relationships: [];

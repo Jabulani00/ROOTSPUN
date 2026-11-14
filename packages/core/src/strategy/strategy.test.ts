@@ -48,7 +48,6 @@ describe("buildStrategy", () => {
     const s = buildStrategy({
       aeo: {
         score: 30,
-        signals: {} as never,
         recommendations: [{ severity: "high", code: "no_faq_schema", message: "No FAQPage structured data" }],
       },
       onPageIssues: [],
@@ -60,7 +59,7 @@ describe("buildStrategy", () => {
   });
 
   it("grades a clean page A with no actions", () => {
-    const s = buildStrategy({ aeo: { score: 100, signals: {} as never, recommendations: [] }, onPageIssues: [], technical: {} });
+    const s = buildStrategy({ aeo: { score: 100, recommendations: [] }, onPageIssues: [], technical: {} });
     expect(s.grade).toBe("A");
     expect(s.actions).toHaveLength(0);
     expect(s.summary).toMatch(/No issues/);

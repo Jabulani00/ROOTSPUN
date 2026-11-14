@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, cn } from "@rootspun/ui";
+import { auditOnPage, buildStrategy, type SeoIssue } from "@rootspun/core";
 import { createClient } from "@/lib/supabase/server";
 import { RunCrawlButton } from "@/components/run-crawl-button";
 import { CwvButton } from "@/components/cwv-button";
@@ -9,7 +10,7 @@ export default async function TechnicalPage({ params }: { params: { id: string }
 
   const { data: crawl } = await supabase
     .from("crawls")
-    .select("id, page_count, finished_at, robots_found, sitemap_found")
+    .select("id, page_count, finished_at, robots_found, sitemap_found, aeo_score")
     .eq("client_id", params.id)
     .order("started_at", { ascending: false })
     .limit(1)
@@ -63,6 +64,57 @@ export default async function TechnicalPage({ params }: { params: { id: string }
       ]
     : [];
 
+  // "How to rank higher" — fuse on-page, canonical, technical and AEO signals
+  // into one prioritised strategy (SEO + AEO).
+  const uniqueOnPage: SeoIssue[] = [];
+  const seenCode = new Set<string>();
+  for (const p of pages ?? []) {
+    for (const i of (p.issues ?? []) as SeoIssue[]) {
+      if (!seenCode.has(i.code)) {
+        seenCode.add(i.code);
+        uniqueOnPage.push(i);
+      }
+    }
+  }
+  const siteAudit = auditOnPage(
+    (pages ?? []).map((p) => ({
+      url: p.url,
+      title: null,
+      metaDescription: null,
+      canonical: p.canonical,
+      noindex: ((p.issues ?? []) as SeoIssue[]).some((i) => i.code === "noindex"),
+    })),
+  );
+  const googleBlocked = (access ?? []).some((a) => a.bot === "Googlebot" && !a.allowed);
+  const anyNoindex = (pages ?? []).some((p) =>
+    ((p.issues ?? []) as SeoIssue[]).some((i) => i.code === "noindex"),
+  );
+  const strategy = crawl
+    ? buildStrategy({
+        onPageIssues: uniqueOnPage,
+        siteIssues: siteAudit.issues,
+        technical: {
+          noindex: anyNoindex,
+          crawlerBlocked: googleBlocked,
+          cwv: cwv ? { lcpMs: cwv.lcp_ms, inpMs: cwv.inp_ms, cls: cwv.cls } : null,
+        },
+        aeo: crawl.aeo_score != null ? { score: crawl.aeo_score } : null,
+      })
+    : null;
+
+  const gradeColor: Record<string, string> = {
+    A: "text-success",
+    B: "text-success",
+    C: "text-primary",
+    D: "text-destructive",
+    F: "text-destructive",
+  };
+  const impactBadge: Record<string, string> = {
+    high: "bg-destructive/15 text-destructive",
+    medium: "bg-primary/15 text-primary",
+    low: "bg-muted text-muted-foreground",
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -71,6 +123,70 @@ export default async function TechnicalPage({ params }: { params: { id: string }
         </p>
         <RunCrawlButton clientId={params.id} />
       </div>
+
+      {strategy && (
+        <Card>
+          <CardHeader>
+            <CardTitle>How to rank higher — SEO &amp; AEO strategy</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="flex flex-wrap items-center gap-6">
+              <div className="flex items-baseline gap-2">
+                <span className={cn("text-4xl font-bold tabular-nums", gradeColor[strategy.grade])}>
+                  {strategy.totalScore}
+                </span>
+                <span className="text-sm text-muted-foreground">/100</span>
+                <span className={cn("ml-1 text-2xl font-semibold", gradeColor[strategy.grade])}>
+                  {strategy.grade}
+                </span>
+              </div>
+              <div className="flex gap-5 text-sm">
+                <div>
+                  <p className="text-xs text-muted-foreground">Classic SEO</p>
+                  <p className="font-semibold tabular-nums">{strategy.classicScore}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">AEO (AI answers)</p>
+                  <p className="font-semibold tabular-nums">{strategy.aeoScore}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Technical</p>
+                  <p className="font-semibold tabular-nums">{strategy.technicalScore}</p>
+                </div>
+              </div>
+            </div>
+
+            {strategy.actions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{strategy.summary}</p>
+            ) : (
+              <ol className="space-y-3">
+                {strategy.actions.slice(0, 12).map((a, idx) => (
+                  <li key={a.title} className="flex gap-3">
+                    <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-secondary text-xs font-semibold tabular-nums">
+                      {idx + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium">{a.title}</span>
+                        <span className={cn("rounded px-1.5 py-0.5 text-[10px] uppercase", impactBadge[a.impact])}>
+                          {a.impact} impact
+                        </span>
+                        <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
+                          {a.effort} effort
+                        </span>
+                        <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
+                          {a.area}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-sm text-muted-foreground">{a.how}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

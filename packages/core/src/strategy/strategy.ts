@@ -11,8 +11,14 @@
  * much it should move the needle, prioritised by impact over effort.
  */
 import type { IssueSeverity, SeoIssue } from "../seo/analyze.js";
-import type { AeoResult } from "../seo/aeo.js";
+import type { AeoRecommendation } from "../seo/aeo.js";
 import type { KeywordRank } from "../keywords/rank.js";
+
+/** Just the AEO fields the strategy needs — callers can pass a score alone. */
+export interface AeoStrategyInput {
+  score: number;
+  recommendations?: AeoRecommendation[];
+}
 
 export type Impact = "high" | "medium" | "low";
 export type Effort = "low" | "medium" | "high";
@@ -39,8 +45,8 @@ export interface StrategyInput {
   url?: string;
   /** From pageIssues(analyzePage(...)). */
   onPageIssues?: SeoIssue[];
-  /** From analyzeAeo(html). */
-  aeo?: AeoResult | null;
+  /** AEO readiness — a score (and optional recommendations) from analyzeAeo. */
+  aeo?: AeoStrategyInput | null;
   technical?: {
     noindex?: boolean;
     /** Googlebot (or a key AI bot) blocked by robots.txt / CDN. */
@@ -161,7 +167,8 @@ export function buildStrategy(input: StrategyInput): Strategy {
 
   for (const i of input.onPageIssues ?? []) actions.push(actionFromIssue(i.code, i.severity, i.message));
   for (const i of input.siteIssues ?? []) actions.push(actionFromIssue(i.code, i.severity, i.message));
-  for (const r of input.aeo?.recommendations ?? []) actions.push(actionFromIssue(r.code, r.severity, r.message));
+  for (const r of input.aeo?.recommendations ?? [])
+    actions.push(actionFromIssue(r.code, r.severity, r.message));
   if (input.technical?.cwv) actions.push(...cwvActions(input.technical.cwv));
   if (input.keyword) {
     const ka = keywordAction(input.keyword);

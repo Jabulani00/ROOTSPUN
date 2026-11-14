@@ -67,6 +67,7 @@ export async function runCrawlAction(clientId: string): Promise<{ error?: string
       finished_at: new Date().toISOString(),
       robots_found: result.robotsFound,
       sitemap_found: result.sitemapFound,
+      aeo_score: result.aeoScore,
     })
     .select("id")
     .single();
@@ -83,6 +84,7 @@ export async function runCrawlAction(clientId: string): Promise<{ error?: string
         nosnippet: p.nosnippet,
         template: p.template,
         issues: p.issues,
+        aeo_score: p.aeoScore,
       })),
     );
   }

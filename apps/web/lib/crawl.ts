@@ -1,5 +1,12 @@
 import "server-only";
-import { analyzePage, collectSitemapUrls, isPathAllowed, pageIssues, type SeoIssue } from "@rootspun/core";
+import {
+  analyzeAeo,
+  analyzePage,
+  collectSitemapUrls,
+  isPathAllowed,
+  pageIssues,
+  type SeoIssue,
+} from "@rootspun/core";
 
 const UA = "RootspunBot/1.0 (+https://rootspun.app; technical SEO audit)";
 export const CRAWL_BOTS = ["Googlebot", "Google-Extended", "GPTBot", "PerplexityBot", "ClaudeBot", "Bingbot"];
@@ -12,8 +19,11 @@ export interface CrawledPage {
   nosnippet: boolean;
   wordCount: number;
   title: string | null;
+  metaDescription: string | null;
   template: string;
   issues: SeoIssue[];
+  /** Answer-engine readiness score 0–100 (null for non-200 pages). */
+  aeoScore: number | null;
 }
 
 export interface CrawlResult {
@@ -21,6 +31,8 @@ export interface CrawlResult {
   sitemapFound: boolean;
   crawlerAccess: { bot: string; allowed: boolean }[];
   pages: CrawledPage[];
+  /** Median AEO score across fetched pages (null if none). */
+  aeoScore: number | null;
 }
 
 async function fetchText(url: string, timeoutMs = 12000, accept: "html" | "xml" = "html") {
@@ -94,7 +106,7 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
 
     const { status, text, finalUrl } = await fetchText(url);
     if (status !== 200 || !text) {
-      pages.push({ url, status, canonical: null, noindex: false, nosnippet: false, wordCount: 0, title: null, template: templateOf(pathname), issues: [] });
+      pages.push({ url, status, canonical: null, noindex: false, nosnippet: false, wordCount: 0, title: null, metaDescription: null, template: templateOf(pathname), issues: [], aeoScore: null });
       continue;
     }
 
@@ -107,8 +119,10 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
       nosnippet: a.nosnippet,
       wordCount: a.wordCount,
       title: a.title,
+      metaDescription: a.metaDescription,
       template: templateOf(new URL(finalUrl).pathname),
       issues: pageIssues(a),
+      aeoScore: analyzeAeo(text).score,
     });
 
     for (const link of a.internalLinks) {
@@ -122,5 +136,8 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
     }
   }
 
-  return { robotsFound: robots.status === 200, sitemapFound, crawlerAccess, pages };
+  const aeoScores = pages.map((p) => p.aeoScore).filter((n): n is number => n != null).sort((a, b) => a - b);
+  const aeoScore = aeoScores.length ? aeoScores[Math.floor(aeoScores.length / 2)]! : null;
+
+  return { robotsFound: robots.status === 200, sitemapFound, crawlerAccess, pages, aeoScore };
 }

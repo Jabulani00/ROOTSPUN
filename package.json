@@ -16,11 +16,13 @@
     "test:e2e": "turbo run test:e2e",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "db:types": "supabase gen types typescript --local > packages/db/src/types.ts",
-    "db:reset": "supabase db reset"
+    "db:reset": "supabase db reset",
+    "db:remote": "node scripts/apply-remote.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
     "eslint": "^9.13.0",
+    "pg": "^8.23.1",
     "prettier": "^3.3.3",
     "turbo": "^2.2.3",
     "typescript": "^5.6.3",

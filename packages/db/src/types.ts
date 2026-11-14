@@ -31,6 +31,22 @@ export interface Database {
         Update: Partial<{ name: string; plan: AgencyPlan; branding: Record<string, unknown>; custom_domain: string | null }>;
         Relationships: [];
       };
+      invites: {
+        Row: Row<{
+          id: string;
+          agency_id: string;
+          email: string;
+          role: AppRole;
+          token: string;
+          status: "pending" | "accepted" | "revoked";
+          created_by: string | null;
+          created_at: string;
+          expires_at: string;
+        }>;
+        Insert: { agency_id: string; email: string; role?: AppRole; token: string; created_by?: string | null };
+        Update: Partial<{ status: "pending" | "accepted" | "revoked"; role: AppRole }>;
+        Relationships: [];
+      };
       memberships: {
         Row: Row<{
           id: string;
@@ -437,6 +453,7 @@ export interface Database {
       connect_gsc_integration: { Args: { p_client_id: string; p_refresh_token: string }; Returns: string };
       gsc_refresh_token: { Args: { p_integration_id: string }; Returns: string };
       bootstrap_agency: { Args: { p_name: string }; Returns: string };
+      accept_invite: { Args: { p_token: string }; Returns: string };
     };
     Enums: {
       app_role: AppRole;

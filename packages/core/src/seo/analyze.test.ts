@@ -44,6 +44,12 @@ describe("analyzePage", () => {
     expect(issues.find((i) => i.code === "no_viewport")?.severity).toBe("medium");
   });
 
+  it("flags missing Open Graph tags, and not when present", () => {
+    expect(pageIssues(analyzePage("<html><head></head><body>x</body></html>", "https://x.co/")).map((i) => i.code)).toContain("no_open_graph");
+    const withOg = `<html><head><meta property="og:title" content="T"></head><body>x</body></html>`;
+    expect(pageIssues(analyzePage(withOg, "https://x.co/")).map((i) => i.code)).not.toContain("no_open_graph");
+  });
+
   it("flags issues on a weak page", () => {
     const weak = `<html><head></head><body><p>short</p><img src="x.jpg"></body></html>`;
     const issues = pageIssues(analyzePage(weak, "https://example.co.za/"));

@@ -177,6 +177,7 @@ export function pageIssues(a: PageAnalysis): SeoIssue[] {
   if (!a.lang) add("low", "no_lang", "No lang attribute on <html> — set it for accessibility and international search");
   if (!a.canonical) add("low", "canonical_missing", "No canonical link");
   if (!a.hasJsonLd) add("low", "no_structured_data", "No JSON-LD structured data (helps AI + rich results)");
+  if (!a.hasOpenGraph) add("low", "no_open_graph", "No Open Graph tags — links render poorly when shared or surfaced");
 
   const order: Record<IssueSeverity, number> = { high: 0, medium: 1, low: 2 };
   return issues.sort((x, y) => order[x.severity] - order[y.severity]);

@@ -101,6 +101,7 @@ const RECIPE: Record<string, { area: Area; effort: Effort; how: string }> = {
   no_lang: { area: "onpage", effort: "low", how: "Set a lang attribute on <html> (e.g. lang=\"en\") for accessibility and international search." },
   canonical_missing: { area: "technical", effort: "low", how: "Add a self-referencing canonical link." },
   no_structured_data: { area: "aeo", effort: "medium", how: "Add JSON-LD (Product/Article/FAQ) so engines and AI answers can parse the page." },
+  no_open_graph: { area: "onpage", effort: "low", how: "Add Open Graph tags (og:title, og:description, og:image) so shared and surfaced links render well." },
   nosnippet: { area: "technical", effort: "low", how: "Remove the nosnippet directive so Google and AI answers can quote the page." },
   // site-level (onpage.ts)
   dup_titles: { area: "onpage", effort: "medium", how: "Give each indexable page a distinct <title>; duplicates split rankings." },

@@ -90,6 +90,7 @@ export async function POST(request: Request): Promise<Response> {
     robotsFound: result.robotsFound,
     sitemapFound: result.sitemapFound,
     crawlerAccess: result.crawlerAccess,
+    schemaTypes: result.schemaTypes,
     score: strategy.totalScore,
     grade: strategy.grade,
     classicScore: strategy.classicScore,

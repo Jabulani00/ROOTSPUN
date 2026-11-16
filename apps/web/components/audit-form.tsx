@@ -20,6 +20,7 @@ interface AuditResult {
   robotsFound: boolean;
   sitemapFound: boolean;
   crawlerAccess: { bot: string; allowed: boolean }[];
+  schemaTypes: string[];
   score: number;
   grade: string;
   classicScore: number;
@@ -117,6 +118,15 @@ export function AuditForm() {
                   {a.allowed ? "✓" : "✗"} {a.bot}
                 </span>
               ))}
+          </div>
+
+          <div className="text-xs">
+            <span className="text-muted-foreground">Structured data: </span>
+            {result.schemaTypes.length > 0 ? (
+              <span>{result.schemaTypes.join(", ")}</span>
+            ) : (
+              <span className="text-destructive">none found — add JSON-LD schema</span>
+            )}
           </div>
 
           <div>

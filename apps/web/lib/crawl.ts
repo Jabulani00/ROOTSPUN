@@ -4,6 +4,7 @@ import {
   analyzeInternalLinks,
   analyzePage,
   collectSitemapUrls,
+  detectSchemaTypes,
   isPathAllowed,
   pageIssues,
   readabilityFromHtml,
@@ -35,6 +36,8 @@ export interface CrawlResult {
   pages: CrawledPage[];
   /** Median AEO score across fetched pages (null if none). */
   aeoScore: number | null;
+  /** Distinct schema.org types seen across the crawl. */
+  schemaTypes: string[];
 }
 
 async function fetchText(url: string, timeoutMs = 12000, accept: "html" | "xml" = "html") {
@@ -94,6 +97,7 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
   const visited = new Set<string>();
   const pages: CrawledPage[] = [];
   const linkPages: { url: string; internalLinks: string[] }[] = [];
+  const schemaTypes = new Set<string>();
 
   while (queue.length > 0 && pages.length < max) {
     const url = queue.shift()!;
@@ -115,6 +119,7 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
 
     const a = analyzePage(text, finalUrl);
     linkPages.push({ url: finalUrl, internalLinks: a.internalLinks });
+    for (const t of detectSchemaTypes(text)) schemaTypes.add(t);
 
     const issues = pageIssues(a);
     // Dense writing hurts rankings and AI citations — flag it on real content.
@@ -170,5 +175,5 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
   const aeoScores = pages.map((p) => p.aeoScore).filter((n): n is number => n != null).sort((a, b) => a - b);
   const aeoScore = aeoScores.length ? aeoScores[Math.floor(aeoScores.length / 2)]! : null;
 
-  return { robotsFound: robots.status === 200, sitemapFound, crawlerAccess, pages, aeoScore };
+  return { robotsFound: robots.status === 200, sitemapFound, crawlerAccess, pages, aeoScore, schemaTypes: [...schemaTypes] };
 }

@@ -21,6 +21,7 @@ interface AuditResult {
   sitemapFound: boolean;
   crawlerAccess: { bot: string; allowed: boolean }[];
   schemaTypes: string[];
+  starterSchema: string | null;
   score: number;
   grade: string;
   classicScore: number;
@@ -128,6 +129,18 @@ export function AuditForm() {
               <span className="text-destructive">none found — add JSON-LD schema</span>
             )}
           </div>
+
+          {result.starterSchema && (
+            <details className="rounded-lg border border-input bg-card p-3 text-xs">
+              <summary className="cursor-pointer font-medium">Paste-ready starter schema (Organization)</summary>
+              <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-[11px] text-muted-foreground">
+                {result.starterSchema}
+              </pre>
+              <p className="mt-1 text-muted-foreground">
+                Drop this into your site&apos;s <code>&lt;head&gt;</code>, then add FAQPage/Product schema per page.
+              </p>
+            </details>
+          )}
 
           <div>
             <p className="mb-2 text-sm font-medium">Top fixes to rank higher</p>

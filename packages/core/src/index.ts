@@ -47,6 +47,7 @@ export { readability, readabilityFromHtml, countSyllables } from "./seo/readabil
 export type { Readability, ReadabilityVerdict } from "./seo/readability.js";
 export { detectSchemaTypes, auditSchema } from "./seo/schema.js";
 export type { SchemaAudit } from "./seo/schema.js";
+export { organizationSchema, faqSchema, jsonLdScript } from "./seo/snippets.js";
 export { analyzeKeyword, rankKeywords } from "./keywords/rank.js";
 export type { KeywordInput, KeywordRank, KeywordSummary, RankBucket, SerpResult } from "./keywords/rank.js";
 export { buildStrategy } from "./strategy/strategy.js";

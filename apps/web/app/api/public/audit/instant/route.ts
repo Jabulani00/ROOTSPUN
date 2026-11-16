@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { auditOnPage, buildStrategy, normalizeHost, type SeoIssue } from "@rootspun/core";
+import { auditOnPage, buildStrategy, jsonLdScript, normalizeHost, organizationSchema, type SeoIssue } from "@rootspun/core";
 import { crawlSite } from "@/lib/crawl";
 import { apiError } from "@/lib/api-auth";
 
@@ -91,6 +91,8 @@ export async function POST(request: Request): Promise<Response> {
     sitemapFound: result.sitemapFound,
     crawlerAccess: result.crawlerAccess,
     schemaTypes: result.schemaTypes,
+    // When a site has no structured data, hand them a paste-ready starter.
+    starterSchema: result.schemaTypes.length === 0 ? jsonLdScript(organizationSchema(host)) : null,
     score: strategy.totalScore,
     grade: strategy.grade,
     classicScore: strategy.classicScore,

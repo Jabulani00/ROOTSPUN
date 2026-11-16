@@ -18,14 +18,18 @@ export default function AuditPage() {
           Are you visible where buyers now ask — <span className="text-primary">AI answers?</span>
         </h1>
         <p className="text-muted-foreground">
-          Google isn&apos;t the only front door anymore. See how your brand appears across Google
-          organic, AI Overviews and ChatGPT — and where competitors are winning the citation.
+          Google isn&apos;t the only front door anymore. Get an instant score for how ready your
+          site is to rank in Google and to be quoted by AI answers — with the exact fixes to climb.
         </p>
         <ul className="space-y-2 text-sm text-muted-foreground">
-          <li>✓ Your Unified Visibility Score across engines</li>
-          <li>✓ Competitor share of voice</li>
-          <li>✓ The top reasons you&apos;re losing citations</li>
+          <li>✓ A live SEO + AEO (AI-answer) readiness score</li>
+          <li>✓ Whether Google and AI crawlers (GPTBot, Perplexity, Claude) can reach you</li>
+          <li>✓ Your top prioritised fixes — no email, no credit card</li>
         </ul>
+        <p className="text-xs text-muted-foreground">
+          Want full tracking across Google, AI Overviews, ChatGPT, Gemini and Perplexity with
+          competitor share of voice? That&apos;s the paid Rootspun platform — start free after your audit.
+        </p>
       </div>
       <AuditForm />
     </main>

@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
-    "eslint": "^9.13.0",
+    "eslint": "^8.57.1",
     "pg": "^8.23.1",
     "prettier": "^3.3.3",
     "turbo": "^2.2.3",

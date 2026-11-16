@@ -116,6 +116,11 @@ export async function loadSampleDataAction(): Promise<{ error?: string; clientId
       evidence: { hasAnsweringPage: false, ruleTitle: "Creating helpful, people-first content", ruleUrl: "https://developers.google.com/search/docs/fundamentals/creating-helpful-content" },
       rule_id: "rule.content.no_answer", confidence: "high", impact: 880, status: "new",
     },
+    {
+      agency_id: agencyId, client_id: clientId, engine_id: engineId.get("perplexity") ?? null, type: "weak_answer_structure",
+      evidence: { aeoScore: 38, engine: "perplexity", ruleTitle: "AI features and your website", ruleUrl: "https://developers.google.com/search/docs/appearance/ai-features" },
+      rule_id: "rule.aeo.weak_structure", confidence: "medium", impact: 720, status: "new",
+    },
   ]);
 
   revalidatePath("/dashboard");

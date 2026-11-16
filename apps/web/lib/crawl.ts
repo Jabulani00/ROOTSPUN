@@ -3,7 +3,8 @@ import {
   analyzeAeo,
   analyzeInternalLinks,
   analyzePage,
-  collectSitemapUrls,
+  collectSitemapEntries,
+  daysSince,
   detectSchemaTypes,
   isPathAllowed,
   pageIssues,
@@ -82,7 +83,7 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
 
   // Seed the crawl with the homepage plus any same-host page URLs in the sitemap.
   const queue: string[] = [`${origin}/`];
-  const sitemapUrls = await collectSitemapUrls(
+  const sitemapEntries = await collectSitemapEntries(
     origin,
     host,
     robotsTxt,
@@ -92,9 +93,18 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
     },
     { limit: max * 6 },
   );
-  const sitemapFound = sitemapUrls !== null;
-  for (const u of sitemapUrls ?? []) {
-    if (queue.length < max * 6) queue.push(u);
+  const sitemapFound = sitemapEntries !== null;
+  // lastmod per pathname, for a content-freshness check during analysis.
+  const lastmodByPath = new Map<string, string>();
+  for (const e of sitemapEntries ?? []) {
+    if (queue.length < max * 6) queue.push(e.loc);
+    if (e.lastmod) {
+      try {
+        lastmodByPath.set(new URL(e.loc).pathname.replace(/\/+$/, "") || "/", e.lastmod);
+      } catch {
+        /* skip */
+      }
+    }
   }
   const visited = new Set<string>();
   const pages: CrawledPage[] = [];
@@ -137,6 +147,17 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
 
     const aeo = analyzeAeo(text);
     for (const r of aeo.recommendations) if (!aeoRecMap.has(r.code)) aeoRecMap.set(r.code, r);
+
+    // Content freshness from the sitemap's lastmod (recency aids rankings + AI).
+    const lastmod = lastmodByPath.get(new URL(finalUrl).pathname.replace(/\/+$/, "") || "/");
+    const ageDays = daysSince(lastmod ?? null);
+    if (ageDays != null && ageDays > 365) {
+      issues.push({
+        severity: "low",
+        code: "stale_content",
+        message: `Not updated in ${Math.floor(ageDays / 30)} months (per sitemap) — refresh for freshness`,
+      });
+    }
 
     pages.push({
       url: finalUrl,

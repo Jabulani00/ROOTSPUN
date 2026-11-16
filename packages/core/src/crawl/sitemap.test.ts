@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  collectSitemapEntries,
   collectSitemapUrls,
+  daysSince,
+  sitemapEntries,
   sitemapLocs,
   sitemapUrlsFromRobots,
   type SitemapFetcher,
@@ -27,6 +30,38 @@ describe("sitemap helpers", () => {
   it("reads Sitemap: directives from robots.txt (case-insensitive)", () => {
     const robots = "User-agent: *\nAllow: /\nSitemap: https://a.co/sitemap.xml\nsitemap: https://a.co/news.xml";
     expect(sitemapUrlsFromRobots(robots)).toEqual(["https://a.co/sitemap.xml", "https://a.co/news.xml"]);
+  });
+});
+
+describe("sitemapEntries + daysSince", () => {
+  it("parses loc and lastmod from a urlset", () => {
+    const xml = `<urlset><url><loc>https://a.co/x</loc><lastmod>2024-01-02</lastmod></url><url><loc>https://a.co/y</loc></url></urlset>`;
+    expect(sitemapEntries(xml)).toEqual([
+      { loc: "https://a.co/x", lastmod: "2024-01-02" },
+      { loc: "https://a.co/y", lastmod: null },
+    ]);
+  });
+
+  it("daysSince computes age and handles bad input", () => {
+    const now = Date.parse("2026-01-01");
+    expect(daysSince("2025-01-01", now)).toBe(365);
+    expect(daysSince(null)).toBeNull();
+    expect(daysSince("not-a-date")).toBeNull();
+  });
+
+  it("collectSitemapEntries returns same-host entries with lastmod", async () => {
+    const entries = await collectSitemapEntries(
+      "https://a.co",
+      "a.co",
+      "",
+      stub({
+        "https://a.co/sitemap.xml": {
+          status: 200,
+          text: `<urlset><url><loc>https://a.co/p</loc><lastmod>2024-05-01</lastmod></url><url><loc>https://other.com/z</loc></url></urlset>`,
+        },
+      }),
+    );
+    expect(entries).toEqual([{ loc: "https://a.co/p", lastmod: "2024-05-01" }]);
   });
 });
 

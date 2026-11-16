@@ -51,6 +51,6 @@ export { analyzeKeyword, rankKeywords } from "./keywords/rank.js";
 export type { KeywordInput, KeywordRank, KeywordSummary, RankBucket, SerpResult } from "./keywords/rank.js";
 export { buildStrategy } from "./strategy/strategy.js";
 export type { Strategy, StrategyInput, StrategyAction, AeoStrategyInput, Impact, Effort, Area } from "./strategy/strategy.js";
-export { collectSitemapUrls, sitemapLocs, sitemapUrlsFromRobots } from "./crawl/sitemap.js";
-export type { SitemapFetcher, SitemapFetchResult } from "./crawl/sitemap.js";
+export { collectSitemapUrls, collectSitemapEntries, sitemapEntries, sitemapLocs, sitemapUrlsFromRobots, daysSince } from "./crawl/sitemap.js";
+export type { SitemapFetcher, SitemapFetchResult, SitemapEntry } from "./crawl/sitemap.js";
 export type { PageAnalysis, SeoIssue, IssueSeverity } from "./seo/analyze.js";

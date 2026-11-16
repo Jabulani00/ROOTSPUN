@@ -38,6 +38,8 @@ export interface CrawlResult {
   aeoScore: number | null;
   /** Distinct schema.org types seen across the crawl. */
   schemaTypes: string[];
+  /** De-duplicated AEO recommendations seen across the crawl (for the strategy). */
+  aeoRecs: SeoIssue[];
 }
 
 async function fetchText(url: string, timeoutMs = 12000, accept: "html" | "xml" = "html") {
@@ -98,6 +100,7 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
   const pages: CrawledPage[] = [];
   const linkPages: { url: string; internalLinks: string[] }[] = [];
   const schemaTypes = new Set<string>();
+  const aeoRecMap = new Map<string, SeoIssue>();
 
   while (queue.length > 0 && pages.length < max) {
     const url = queue.shift()!;
@@ -132,6 +135,9 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
       });
     }
 
+    const aeo = analyzeAeo(text);
+    for (const r of aeo.recommendations) if (!aeoRecMap.has(r.code)) aeoRecMap.set(r.code, r);
+
     pages.push({
       url: finalUrl,
       status,
@@ -143,7 +149,7 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
       metaDescription: a.metaDescription,
       template: templateOf(new URL(finalUrl).pathname),
       issues,
-      aeoScore: analyzeAeo(text).score,
+      aeoScore: aeo.score,
     });
 
     for (const link of a.internalLinks) {
@@ -175,5 +181,13 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
   const aeoScores = pages.map((p) => p.aeoScore).filter((n): n is number => n != null).sort((a, b) => a - b);
   const aeoScore = aeoScores.length ? aeoScores[Math.floor(aeoScores.length / 2)]! : null;
 
-  return { robotsFound: robots.status === 200, sitemapFound, crawlerAccess, pages, aeoScore, schemaTypes: [...schemaTypes] };
+  return {
+    robotsFound: robots.status === 200,
+    sitemapFound,
+    crawlerAccess,
+    pages,
+    aeoScore,
+    schemaTypes: [...schemaTypes],
+    aeoRecs: [...aeoRecMap.values()],
+  };
 }

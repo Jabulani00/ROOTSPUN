@@ -81,7 +81,7 @@ export async function POST(request: Request): Promise<Response> {
     onPageIssues: uniqueOnPage,
     siteIssues: siteAudit.issues,
     technical: { noindex: anyNoindex, crawlerBlocked: googleBlocked, cwv: null },
-    aeo: result.aeoScore != null ? { score: result.aeoScore } : null,
+    aeo: result.aeoScore != null ? { score: result.aeoScore, recommendations: result.aeoRecs } : null,
   });
 
   return Response.json({

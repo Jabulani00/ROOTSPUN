@@ -10,7 +10,7 @@ export default async function TechnicalPage({ params }: { params: { id: string }
 
   const { data: crawl } = await supabase
     .from("crawls")
-    .select("id, page_count, finished_at, robots_found, sitemap_found, aeo_score")
+    .select("id, page_count, finished_at, robots_found, sitemap_found, aeo_score, aeo_recs")
     .eq("client_id", params.id)
     .order("started_at", { ascending: false })
     .limit(1)
@@ -98,7 +98,13 @@ export default async function TechnicalPage({ params }: { params: { id: string }
           crawlerBlocked: googleBlocked,
           cwv: cwv ? { lcpMs: cwv.lcp_ms, inpMs: cwv.inp_ms, cls: cwv.cls } : null,
         },
-        aeo: crawl.aeo_score != null ? { score: crawl.aeo_score } : null,
+        aeo:
+          crawl.aeo_score != null
+            ? {
+                score: crawl.aeo_score,
+                recommendations: (crawl.aeo_recs ?? []) as { severity: "high" | "medium" | "low"; code: string; message: string }[],
+              }
+            : null,
       })
     : null;
 

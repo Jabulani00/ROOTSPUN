@@ -324,8 +324,9 @@ export interface Database {
           robots_found: boolean | null;
           sitemap_found: boolean | null;
           aeo_score: number | null;
+          aeo_recs: { severity: string; code: string; message: string }[];
         }>;
-        Insert: { agency_id: string; client_id: string; page_count?: number; status?: string; finished_at?: string | null; robots_found?: boolean | null; sitemap_found?: boolean | null; aeo_score?: number | null };
+        Insert: { agency_id: string; client_id: string; page_count?: number; status?: string; finished_at?: string | null; robots_found?: boolean | null; sitemap_found?: boolean | null; aeo_score?: number | null; aeo_recs?: { severity: string; code: string; message: string }[] };
         Update: Partial<{ finished_at: string | null; page_count: number; status: string }>;
         Relationships: [];
       };

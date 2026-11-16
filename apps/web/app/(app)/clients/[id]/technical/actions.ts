@@ -68,6 +68,7 @@ export async function runCrawlAction(clientId: string): Promise<{ error?: string
       robots_found: result.robotsFound,
       sitemap_found: result.sitemapFound,
       aeo_score: result.aeoScore,
+      aeo_recs: result.aeoRecs,
     })
     .select("id")
     .single();

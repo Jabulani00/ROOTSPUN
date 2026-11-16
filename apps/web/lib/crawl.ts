@@ -6,6 +6,7 @@ import {
   collectSitemapUrls,
   isPathAllowed,
   pageIssues,
+  readabilityFromHtml,
   type SeoIssue,
 } from "@rootspun/core";
 
@@ -114,6 +115,18 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
 
     const a = analyzePage(text, finalUrl);
     linkPages.push({ url: finalUrl, internalLinks: a.internalLinks });
+
+    const issues = pageIssues(a);
+    // Dense writing hurts rankings and AI citations — flag it on real content.
+    const read = readabilityFromHtml(text);
+    if (a.wordCount >= 150 && read.fleschReadingEase < 45) {
+      issues.push({
+        severity: "low",
+        code: "hard_to_read",
+        message: `Hard to read (Flesch ${read.fleschReadingEase}, grade ${read.gradeLevel}) — simplify wording`,
+      });
+    }
+
     pages.push({
       url: finalUrl,
       status,
@@ -124,7 +137,7 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
       title: a.title,
       metaDescription: a.metaDescription,
       template: templateOf(new URL(finalUrl).pathname),
-      issues: pageIssues(a),
+      issues,
       aeoScore: analyzeAeo(text).score,
     });
 

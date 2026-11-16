@@ -43,6 +43,8 @@ export { auditOnPage } from "./seo/onpage.js";
 export type { OnPageRecord, SiteAudit, DuplicateGroup, CanonicalIssue } from "./seo/onpage.js";
 export { analyzeInternalLinks } from "./seo/links.js";
 export type { LinkPage, LinkAudit, PageLinkStat } from "./seo/links.js";
+export { readability, readabilityFromHtml, countSyllables } from "./seo/readability.js";
+export type { Readability, ReadabilityVerdict } from "./seo/readability.js";
 export { analyzeKeyword, rankKeywords } from "./keywords/rank.js";
 export type { KeywordInput, KeywordRank, KeywordSummary, RankBucket, SerpResult } from "./keywords/rank.js";
 export { buildStrategy } from "./strategy/strategy.js";

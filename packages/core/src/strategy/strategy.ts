@@ -95,6 +95,7 @@ const RECIPE: Record<string, { area: Area; effort: Effort; how: string }> = {
   h1_missing: { area: "onpage", effort: "low", how: "Add a single descriptive <h1> that states the page's topic." },
   h1_multiple: { area: "onpage", effort: "low", how: "Keep one <h1>; demote the rest to <h2>." },
   thin_content: { area: "content", effort: "medium", how: "Expand to genuinely helpful depth (aim 600+ words) covering the questions buyers ask." },
+  hard_to_read: { area: "content", effort: "medium", how: "Shorten sentences, cut jargon and use plainer words — clearer copy ranks and gets quoted by AI more." },
   img_alt: { area: "onpage", effort: "low", how: "Add descriptive alt text to images for accessibility and image search." },
   canonical_missing: { area: "technical", effort: "low", how: "Add a self-referencing canonical link." },
   no_structured_data: { area: "aeo", effort: "medium", how: "Add JSON-LD (Product/Article/FAQ) so engines and AI answers can parse the page." },

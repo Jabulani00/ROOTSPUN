@@ -104,6 +104,10 @@ const RECIPE: Record<string, { area: Area; effort: Effort; how: string }> = {
   dup_descriptions: { area: "onpage", effort: "low", how: "Write a distinct meta description per page." },
   canonical_offsite: { area: "technical", effort: "medium", how: "Point the canonical at this site, not another domain, or the page can't rank." },
   canonical_elsewhere: { area: "technical", effort: "medium", how: "If this URL should rank, make the canonical self-referencing." },
+  // internal links (links.ts)
+  orphan: { area: "onpage", effort: "medium", how: "Link to this page from the nav, related content, or body copy so it gets discovered and ranking signals." },
+  orphan_pages: { area: "onpage", effort: "medium", how: "Add internal links to the orphan pages from relevant hub pages." },
+  weak_internal_links: { area: "onpage", effort: "low", how: "Add more contextual internal links to under-linked pages." },
   // AEO (aeo.ts) — codes come through analyzeAeo recommendations
   no_lead_answer: { area: "aeo", effort: "low", how: "Open with a direct 1–3 sentence answer to the page's core question." },
   lead_answer_long: { area: "aeo", effort: "low", how: "Tighten the opening into a short, quotable answer; detail can follow." },

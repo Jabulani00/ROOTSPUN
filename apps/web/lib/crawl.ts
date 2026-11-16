@@ -1,6 +1,7 @@
 import "server-only";
 import {
   analyzeAeo,
+  analyzeInternalLinks,
   analyzePage,
   collectSitemapUrls,
   isPathAllowed,
@@ -91,6 +92,7 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
   }
   const visited = new Set<string>();
   const pages: CrawledPage[] = [];
+  const linkPages: { url: string; internalLinks: string[] }[] = [];
 
   while (queue.length > 0 && pages.length < max) {
     const url = queue.shift()!;
@@ -111,6 +113,7 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
     }
 
     const a = analyzePage(text, finalUrl);
+    linkPages.push({ url: finalUrl, internalLinks: a.internalLinks });
     pages.push({
       url: finalUrl,
       status,
@@ -132,6 +135,21 @@ export async function crawlSite(domain: string, max = 10): Promise<CrawlResult> 
         if (!visited.has(abs.pathname) && queue.length < max * 4) queue.push(abs.toString());
       } catch {
         /* skip */
+      }
+    }
+  }
+
+  // Internal link graph: flag orphan pages (no inbound internal links) so they
+  // surface in the aggregated issues and the ranking strategy. Medium severity
+  // because a capped crawl can miss inbound links from uncrawled pages.
+  if (linkPages.length > 1) {
+    const orphanSet = new Set(analyzeInternalLinks(linkPages).orphans);
+    for (const p of pages) {
+      if (orphanSet.has(p.url)) {
+        p.issues = [
+          { severity: "medium", code: "orphan", message: "Orphan page — no internal links point here" },
+          ...p.issues,
+        ];
       }
     }
   }

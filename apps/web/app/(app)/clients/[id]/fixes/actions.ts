@@ -13,6 +13,7 @@ const FIX_STEPS: Record<string, string[]> = {
   slow_template: ["Profile the slow template", "Fix the failing Core Web Vital", "Verify field data improves"],
   competitor_cited: ["Audit the cited competitor pages", "Close depth/freshness/E-E-A-T gaps", "Add supporting structured data"],
   no_answering_page: ["Create a page that directly answers the prompt", "Cover the entities and sub-questions", "Add internal links"],
+  weak_answer_structure: ["Open with a concise direct answer", "Use question-style headings + FAQ schema", "Add lists/tables engines can lift"],
 };
 
 const KIND: Record<string, "dev" | "content" | "pr"> = {
@@ -22,6 +23,7 @@ const KIND: Record<string, "dev" | "content" | "pr"> = {
   slow_template: "dev",
   competitor_cited: "content",
   no_answering_page: "content",
+  weak_answer_structure: "content",
 };
 
 /** RS-303 — turn an accepted cause into a fix ticket with steps, rule link and impact. */

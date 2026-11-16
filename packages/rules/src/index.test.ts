@@ -26,6 +26,7 @@ describe("google rules library", () => {
       "rule.cwv.poor",
       "rule.content.no_answer",
       "rule.content.competitor_cited",
+      "rule.aeo.weak_structure",
     ]) {
       expect(getRule(id), id).toBeDefined();
     }

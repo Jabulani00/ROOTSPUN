@@ -1,4 +1,4 @@
-import type { Confidence } from "../types.js";
+import { AI_ENGINES, type Confidence } from "../types.js";
 import type { Cause, LossContext, WhyRule } from "./types.js";
 
 /** Google's "good" Core Web Vitals thresholds (RS-202). */
@@ -142,6 +142,37 @@ export const RULES: WhyRule[] = [
         ruleId: "rule.content.no_answer",
         summary: "No page on the site directly answers this prompt",
         evidence: { hasAnsweringPage: false, promptId: ctx.promptId },
+        confidence: conf(score),
+        score,
+      };
+    },
+  },
+
+  // ── Weak answer structure (AI engines) ───────────────────────────────────────
+  {
+    type: "weak_answer_structure",
+    ruleId: "rule.aeo.weak_structure",
+    evaluate: (ctx: LossContext): Cause | null => {
+      // Only meaningful for AI answer engines, when the page CAN rank (indexed,
+      // crawlable, has an answering page) but is poorly structured for citation.
+      if (!AI_ENGINES.includes(ctx.engine)) return null;
+      if (typeof ctx.aeoScore !== "number") return null;
+      if (ctx.aeoScore >= 50) return null;
+      if (ctx.indexedInGsc === false || ctx.robotsAllowed === false || ctx.metaRobotsNoindex === true)
+        return null;
+      if (ctx.hasAnsweringPage === false) return null;
+
+      // Lower AEO score → stronger signal, but capped since other factors matter.
+      const score = Math.min(0.65, 0.35 + (50 - ctx.aeoScore) / 100);
+      return {
+        type: "weak_answer_structure",
+        ruleId: "rule.aeo.weak_structure",
+        summary: `Page can rank but isn't structured for AI answers (AEO ${ctx.aeoScore}/100) — add a concise lead answer, question headings and FAQ schema`,
+        evidence: {
+          aeoScore: ctx.aeoScore,
+          engine: ctx.engine,
+          targetUrl: ctx.targetUrl ?? null,
+        },
         confidence: conf(score),
         score,
       };

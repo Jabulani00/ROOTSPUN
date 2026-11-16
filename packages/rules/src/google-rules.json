@@ -57,6 +57,15 @@
       "fixHint": "Study the cited competitor pages; close gaps in depth, freshness, structured data and demonstrated expertise."
     },
     {
+      "id": "rule.aeo.weak_structure",
+      "title": "AI features and your website",
+      "url": "https://developers.google.com/search/docs/appearance/ai-features",
+      "summary": "AI answers draw on pages that clearly and concisely answer the question. A page that is indexable but buries its answer, lacks question-style headings or has no structured data is passed over for better-structured sources.",
+      "category": "content",
+      "whyGoogleCares": "AI Overviews and answer engines lift concise, well-structured, machine-readable answers; unstructured pages are harder to quote.",
+      "fixHint": "Open with a direct answer, use question-style H2/H3s, add FAQ/HowTo structured data, and break key points into lists or tables."
+    },
+    {
       "id": "rule.spam.scaled_content",
       "title": "Scaled content abuse",
       "url": "https://developers.google.com/search/docs/essentials/spam-policies#scaled-content-abuse",

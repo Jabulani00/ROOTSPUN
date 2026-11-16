@@ -72,6 +72,44 @@ describe("diagnose", () => {
     expect(cause?.type).toBe("no_answering_page");
   });
 
+  it("flags weak_answer_structure on an AI engine when AEO is low but the page can rank", () => {
+    const [cause] = diagnose({
+      ...base,
+      engine: "perplexity",
+      indexedInGsc: true,
+      robotsAllowed: true,
+      hasAnsweringPage: true,
+      aeoScore: 25,
+    });
+    expect(cause?.type).toBe("weak_answer_structure");
+    expect(cause?.evidence.aeoScore).toBe(25);
+    expect(cause?.ruleId).toBe("rule.aeo.weak_structure");
+  });
+
+  it("does not flag weak_answer_structure for organic engines or good AEO", () => {
+    expect(
+      diagnose({ ...base, engine: "google_organic", aeoScore: 10, indexedInGsc: true }).find(
+        (c) => c.type === "weak_answer_structure",
+      ),
+    ).toBeUndefined();
+    expect(
+      diagnose({ ...base, engine: "chatgpt", aeoScore: 80, indexedInGsc: true }).find(
+        (c) => c.type === "weak_answer_structure",
+      ),
+    ).toBeUndefined();
+  });
+
+  it("suppresses weak_answer_structure when a harder blocker exists", () => {
+    const causes = diagnose({
+      ...base,
+      engine: "chatgpt",
+      metaRobotsNoindex: true, // blocker present
+      aeoScore: 20,
+    });
+    expect(causes.some((c) => c.type === "weak_answer_structure")).toBe(false);
+    expect(causes[0]?.type).toBe("not_indexed");
+  });
+
   it("flags competitor_cited and ranks a fundamental blocker above it", () => {
     const causes = diagnose({
       ...base,

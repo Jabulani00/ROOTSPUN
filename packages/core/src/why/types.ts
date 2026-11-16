@@ -7,7 +7,8 @@ export type CauseType =
   | "crawl_blocked"
   | "slow_template"
   | "competitor_cited"
-  | "no_answering_page";
+  | "no_answering_page"
+  | "weak_answer_structure";
 
 /**
  * Facts about one lost ranking or citation, assembled by the worker from crawl,
@@ -36,6 +37,9 @@ export interface LossContext {
   /** Who got cited instead, and whether any client page addresses the prompt. */
   competitorCitedHosts?: string[];
   hasAnsweringPage?: boolean;
+
+  /** Answer-engine readiness of the target page (0–100, from analyzeAeo). */
+  aeoScore?: number | null;
 
   /** Prior visibility so we can gauge impact. */
   searchVolume?: number;

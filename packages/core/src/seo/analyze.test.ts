@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { analyzePage, pageIssues, isExpectedNoindexPath } from "./analyze.js";
 
 const goodPage = `
-<html><head>
+<html lang="en"><head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Life Coaching in South Africa — Find Your Purpose Today</title>
   <meta name="description" content="Transform your life with certified coaching. Book a free discovery call and start your personal growth journey today.">
   <link rel="canonical" href="https://example.co.za/coaching">
@@ -31,6 +32,16 @@ describe("analyzePage", () => {
     expect(a.hasOpenGraph).toBe(true);
     expect(a.internalLinks).toContain("/about");
     expect(a.externalLinkCount).toBe(1);
+    expect(a.hasViewport).toBe(true);
+    expect(a.lang).toBe("en");
+  });
+
+  it("flags a missing mobile viewport and html lang", () => {
+    const issues = pageIssues(analyzePage("<html><head></head><body><p>x</p></body></html>", "https://x.co/"));
+    const codes = issues.map((i) => i.code);
+    expect(codes).toContain("no_viewport");
+    expect(codes).toContain("no_lang");
+    expect(issues.find((i) => i.code === "no_viewport")?.severity).toBe("medium");
   });
 
   it("flags issues on a weak page", () => {

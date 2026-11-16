@@ -28,6 +28,10 @@ export interface PageAnalysis {
   hreflangCount: number;
   internalLinks: string[];
   externalLinkCount: number;
+  /** Mobile viewport meta present (mobile-first indexing). */
+  hasViewport: boolean;
+  /** `lang` value on <html>, or null. */
+  lang: string | null;
 }
 
 export type IssueSeverity = "high" | "medium" | "low";
@@ -82,6 +86,8 @@ export function analyzePage(html: string, url: string): PageAnalysis {
   const hasJsonLd = /<script\b[^>]*type\s*=\s*["']application\/ld\+json["']/i.test(html);
   const hasOpenGraph = /property\s*=\s*["']og:/i.test(html);
   const hreflangCount = (html.match(/hreflang\s*=/gi) ?? []).length;
+  const hasViewport = /<meta\b[^>]*name\s*=\s*["']viewport["']/i.test(html);
+  const lang = /<html\b[^>]*\blang\s*=\s*["']([^"']+)["']/i.exec(html)?.[1]?.trim() ?? null;
 
   const hrefs = [...html.matchAll(/<a\b[^>]*href\s*=\s*["']([^"']+)["']/gi)].map((m) => m[1]!);
   const internalLinks: string[] = [];
@@ -115,6 +121,8 @@ export function analyzePage(html: string, url: string): PageAnalysis {
     hreflangCount,
     internalLinks: [...new Set(internalLinks)],
     externalLinkCount,
+    hasViewport,
+    lang,
   };
 }
 
@@ -165,6 +173,8 @@ export function pageIssues(a: PageAnalysis): SeoIssue[] {
   if (a.wordCount < 300 && !isExpectedNoindexPath(a.url))
     add("medium", "thin_content", `Thin content (~${a.wordCount} words)`);
   if (a.imagesMissingAlt > 0) add("low", "img_alt", `${a.imagesMissingAlt} image(s) missing alt text`);
+  if (!a.hasViewport) add("medium", "no_viewport", "No mobile viewport meta — fails mobile-friendliness (mobile-first indexing)");
+  if (!a.lang) add("low", "no_lang", "No lang attribute on <html> — set it for accessibility and international search");
   if (!a.canonical) add("low", "canonical_missing", "No canonical link");
   if (!a.hasJsonLd) add("low", "no_structured_data", "No JSON-LD structured data (helps AI + rich results)");
 

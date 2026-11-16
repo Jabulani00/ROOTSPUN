@@ -97,6 +97,8 @@ const RECIPE: Record<string, { area: Area; effort: Effort; how: string }> = {
   thin_content: { area: "content", effort: "medium", how: "Expand to genuinely helpful depth (aim 600+ words) covering the questions buyers ask." },
   hard_to_read: { area: "content", effort: "medium", how: "Shorten sentences, cut jargon and use plainer words — clearer copy ranks and gets quoted by AI more." },
   img_alt: { area: "onpage", effort: "low", how: "Add descriptive alt text to images for accessibility and image search." },
+  no_viewport: { area: "technical", effort: "low", how: "Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> — Google indexes the mobile page first." },
+  no_lang: { area: "onpage", effort: "low", how: "Set a lang attribute on <html> (e.g. lang=\"en\") for accessibility and international search." },
   canonical_missing: { area: "technical", effort: "low", how: "Add a self-referencing canonical link." },
   no_structured_data: { area: "aeo", effort: "medium", how: "Add JSON-LD (Product/Article/FAQ) so engines and AI answers can parse the page." },
   nosnippet: { area: "technical", effort: "low", how: "Remove the nosnippet directive so Google and AI answers can quote the page." },

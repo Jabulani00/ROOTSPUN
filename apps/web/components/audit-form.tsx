@@ -49,6 +49,24 @@ export function AuditForm() {
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [result, setResult] = useState<AuditResult | null>(null);
+  const [lead, setLead] = useState("");
+  const [leadState, setLeadState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  async function captureLead(e: React.FormEvent) {
+    e.preventDefault();
+    if (!result) return;
+    setLeadState("sending");
+    try {
+      const res = await fetch("/api/public/audit", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ domain: result.host, email: lead, competitors: [] }),
+      });
+      setLeadState(res.ok ? "sent" : "error");
+    } catch {
+      setLeadState("error");
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -166,6 +184,25 @@ export function AuditForm() {
               Track {result.host} across Google, AI Overviews, ChatGPT, Gemini and Perplexity — with
               competitor share of voice and the reasons behind every lost citation.
             </p>
+            {leadState === "sent" ? (
+              <p className="mb-3 text-success">Thanks — we&apos;ll send a full report and keep an eye on {result.host}. 🎉</p>
+            ) : (
+              <form onSubmit={captureLead} className="mb-3 flex flex-col gap-2 sm:flex-row">
+                <input
+                  type="email"
+                  required
+                  className={field + " sm:flex-1"}
+                  placeholder="you@company.com"
+                  value={lead}
+                  onChange={(e) => setLead(e.target.value)}
+                  aria-label="Email for the full report"
+                />
+                <Button type="submit" size="sm" disabled={leadState === "sending"}>
+                  {leadState === "sending" ? "Sending…" : "Email me the full report"}
+                </Button>
+              </form>
+            )}
+            {leadState === "error" && <p className="mb-2 text-xs text-destructive">Couldn&apos;t save that — try again.</p>}
             <Link
               href="/sign-up"
               className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"

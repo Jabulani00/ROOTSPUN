@@ -43,6 +43,75 @@ const impactBadge: Record<string, string> = {
   medium: "bg-primary/15 text-primary",
   low: "bg-muted text-muted-foreground",
 };
+const gradeVerdict: Record<string, string> = {
+  A: "Excellent — you're ahead of most sites.",
+  B: "Good — a few fixes will push you further.",
+  C: "Fair — clear gaps are holding you back.",
+  D: "Needs work — several issues are limiting visibility.",
+  F: "Critical — major blockers to fix first.",
+};
+
+/** Circular score gauge. */
+function ScoreRing({ score, grade }: { score: number; grade: string }) {
+  const r = 52;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - Math.max(0, Math.min(100, score)) / 100);
+  return (
+    <div className="relative h-32 w-32 shrink-0">
+      <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
+        <circle cx="60" cy="60" r={r} fill="none" strokeWidth="9" className="text-border" stroke="currentColor" />
+        <circle
+          cx="60"
+          cy="60"
+          r={r}
+          fill="none"
+          strokeWidth="9"
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          strokeDashoffset={offset}
+          className={cn("transition-all", gradeColor[grade])}
+          stroke="currentColor"
+        />
+      </svg>
+      <div className="absolute inset-0 grid place-items-center text-center">
+        <div>
+          <div className={cn("text-3xl font-bold leading-none tabular-nums", gradeColor[grade])}>{score}</div>
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">of 100</div>
+          <div className={cn("mt-0.5 text-sm font-semibold", gradeColor[grade])}>Grade {grade}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Labeled score bar. */
+function ScoreBar({ label, value, hint }: { label: string; value: number; hint: string }) {
+  const color = value >= 75 ? "bg-success" : value >= 50 ? "bg-primary" : "bg-destructive";
+  return (
+    <div>
+      <div className="mb-1 flex items-baseline justify-between">
+        <span className="text-sm font-medium">{label}</span>
+        <span className="text-xs tabular-nums text-muted-foreground">{value}/100</span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-muted">
+        <div className={cn("h-full rounded-full", color)} style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
+      </div>
+      <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
+/** A compact labelled statistic tile. */
+function Stat({ label, value, tone }: { label: string; value: string | number; tone?: "good" | "bad" }) {
+  return (
+    <div className="rounded-lg border bg-card p-3">
+      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className={cn("mt-0.5 text-xl font-semibold tabular-nums", tone === "good" && "text-success", tone === "bad" && "text-destructive")}>
+        {value}
+      </p>
+    </div>
+  );
+}
 
 export function AuditForm() {
   const [domain, setDomain] = useState("");
@@ -94,90 +163,136 @@ export function AuditForm() {
   }
 
   if (state === "done" && result) {
+    const highCount = result.actions.filter((a) => a.impact === "high").length;
+    const medCount = result.actions.filter((a) => a.impact === "medium").length;
+    const lowCount = result.actions.filter((a) => a.impact === "low").length;
+    const searchBots = ["Googlebot", "Bingbot", "Google-Extended"];
+    const aiBots = ["GPTBot", "PerplexityBot", "ClaudeBot"];
+    const botRow = (names: string[]) =>
+      result.crawlerAccess
+        .filter((a) => names.includes(a.bot))
+        .map((a) => (
+          <span
+            key={a.bot}
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs",
+              a.allowed ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive",
+            )}
+          >
+            {a.allowed ? "✓" : "✗"} {a.bot}
+          </span>
+        ));
+
     return (
       <Card>
-        <CardContent className="space-y-5 p-6">
+        <CardContent className="space-y-6 p-6">
+          {/* Report header */}
+          <div className="flex items-center justify-between gap-3 border-b pb-4">
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">SEO &amp; AEO audit report</p>
+              <p className="text-lg font-semibold">{result.host}</p>
+              <p className="text-xs text-muted-foreground">Live crawl of {result.pagesCrawled} pages · just now</p>
+            </div>
+            <span className="rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">Rootspun</span>
+          </div>
+
+          {/* Score + breakdown */}
+          <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
+            <ScoreRing score={result.score} grade={result.grade} />
+            <div className="flex-1 space-y-3 self-stretch">
+              <p className="text-sm text-muted-foreground">{gradeVerdict[result.grade]}</p>
+              <ScoreBar label="Classic SEO" value={result.classicScore} hint="Indexability, titles, meta, headings, canonicals, links" />
+              <ScoreBar label="AEO · AI answers" value={result.aeoScore} hint="Lead answer, question headings, FAQ schema, lists" />
+              <ScoreBar label="Technical" value={result.technicalScore} hint="Crawlability, mobile, Core Web Vitals" />
+            </div>
+          </div>
+
+          {/* At a glance */}
           <div>
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">SEO + AEO score for</p>
-            <p className="font-medium">{result.host}</p>
-          </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-baseline gap-1">
-              <span className={cn("text-5xl font-bold tabular-nums", gradeColor[result.grade])}>{result.score}</span>
-              <span className="text-sm text-muted-foreground">/100</span>
-              <span className={cn("ml-1 text-3xl font-semibold", gradeColor[result.grade])}>{result.grade}</span>
-            </div>
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div>
-                <p className="text-xs text-muted-foreground">Classic SEO</p>
-                <p className="font-semibold tabular-nums">{result.classicScore}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">AEO</p>
-                <p className="font-semibold tabular-nums">{result.aeoScore}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Technical</p>
-                <p className="font-semibold tabular-nums">{result.technicalScore}</p>
-              </div>
+            <p className="mb-2 text-sm font-semibold">At a glance</p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Stat label="Pages crawled" value={result.pagesCrawled} />
+              <Stat label="Structured data" value={result.schemaTypes.length || "none"} tone={result.schemaTypes.length ? "good" : "bad"} />
+              <Stat label="High-priority fixes" value={highCount} tone={highCount ? "bad" : "good"} />
+              <Stat label="Total fixes" value={result.actions.length} />
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 text-xs">
-            <span className={cn("rounded-full px-2 py-1", result.robotsFound ? "bg-success/15 text-success" : "bg-muted text-muted-foreground")}>
-              robots.txt {result.robotsFound ? "✓" : "—"}
-            </span>
-            <span className={cn("rounded-full px-2 py-1", result.sitemapFound ? "bg-success/15 text-success" : "bg-muted text-muted-foreground")}>
-              sitemap {result.sitemapFound ? "✓" : "—"}
-            </span>
-            {result.crawlerAccess
-              .filter((a) => ["GPTBot", "PerplexityBot", "ClaudeBot"].includes(a.bot))
-              .map((a) => (
-                <span key={a.bot} className={cn("rounded-full px-2 py-1", a.allowed ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive")}>
-                  {a.allowed ? "✓" : "✗"} {a.bot}
+          {/* Crawler access matrix */}
+          <div>
+            <p className="mb-2 text-sm font-semibold">Crawler access</p>
+            <div className="space-y-2 rounded-lg border bg-card p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={cn("rounded-full px-2.5 py-1 text-xs", result.robotsFound ? "bg-success/15 text-success" : "bg-muted text-muted-foreground")}>
+                  robots.txt {result.robotsFound ? "found" : "missing"}
                 </span>
-              ))}
+                <span className={cn("rounded-full px-2.5 py-1 text-xs", result.sitemapFound ? "bg-success/15 text-success" : "bg-muted text-muted-foreground")}>
+                  sitemap {result.sitemapFound ? "found" : "missing"}
+                </span>
+              </div>
+              <div>
+                <p className="mb-1 text-[11px] uppercase tracking-wide text-muted-foreground">Search engines</p>
+                <div className="flex flex-wrap gap-2">{botRow(searchBots)}</div>
+              </div>
+              <div>
+                <p className="mb-1 text-[11px] uppercase tracking-wide text-muted-foreground">AI answer engines</p>
+                <div className="flex flex-wrap gap-2">{botRow(aiBots)}</div>
+              </div>
+            </div>
           </div>
 
-          <div className="text-xs">
-            <span className="text-muted-foreground">Structured data: </span>
+          {/* Structured data */}
+          <div>
+            <p className="mb-2 text-sm font-semibold">Structured data</p>
             {result.schemaTypes.length > 0 ? (
-              <span>{result.schemaTypes.join(", ")}</span>
+              <div className="flex flex-wrap gap-2">
+                {result.schemaTypes.map((t) => (
+                  <span key={t} className="rounded-full bg-success/15 px-2.5 py-1 text-xs text-success">{t}</span>
+                ))}
+              </div>
             ) : (
-              <span className="text-destructive">none found — add JSON-LD schema</span>
+              <p className="text-sm text-destructive">None found — pages have no JSON-LD schema for engines or AI to parse.</p>
+            )}
+            {result.starterSchema && (
+              <details className="mt-2 rounded-lg border bg-muted/40 p-3 text-xs">
+                <summary className="cursor-pointer font-medium">Paste-ready starter schema (Organization)</summary>
+                <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-[11px] text-muted-foreground">{result.starterSchema}</pre>
+                <p className="mt-1 text-muted-foreground">
+                  Drop this into your site&apos;s <code>&lt;head&gt;</code>, then add FAQPage/Product schema per page.
+                </p>
+              </details>
             )}
           </div>
 
-          {result.starterSchema && (
-            <details className="rounded-lg border border-input bg-card p-3 text-xs">
-              <summary className="cursor-pointer font-medium">Paste-ready starter schema (Organization)</summary>
-              <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-[11px] text-muted-foreground">
-                {result.starterSchema}
-              </pre>
-              <p className="mt-1 text-muted-foreground">
-                Drop this into your site&apos;s <code>&lt;head&gt;</code>, then add FAQPage/Product schema per page.
-              </p>
-            </details>
-          )}
-
+          {/* Prioritised fixes */}
           <div>
-            <p className="mb-2 text-sm font-medium">Top fixes to rank higher</p>
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-sm font-semibold">Prioritised fixes</p>
+              <p className="text-xs text-muted-foreground">
+                {highCount} high · {medCount} medium · {lowCount} low
+              </p>
+            </div>
             <ol className="space-y-2">
               {result.actions.map((a, i) => (
-                <li key={a.title} className="flex gap-2 text-sm">
-                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-secondary text-xs font-semibold">
+                <li key={a.title} className="flex gap-3 rounded-lg border bg-card p-3">
+                  <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-secondary text-xs font-semibold tabular-nums">
                     {i + 1}
                   </span>
-                  <div>
-                    <span className="font-medium">{a.title}</span>{" "}
-                    <span className={cn("rounded px-1 py-0.5 text-[10px] uppercase", impactBadge[a.impact])}>{a.impact}</span>
-                    <p className="text-xs text-muted-foreground">{a.how}</p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="font-medium">{a.title}</span>
+                      <span className={cn("rounded px-1.5 py-0.5 text-[10px] uppercase", impactBadge[a.impact])}>{a.impact} impact</span>
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">{a.effort} effort</span>
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">{a.area}</span>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">{a.how}</p>
                   </div>
                 </li>
               ))}
             </ol>
           </div>
 
+          {/* Lead capture + CTA */}
           <div className="rounded-lg bg-secondary/50 p-4 text-sm">
             <p className="font-medium">Want the full picture?</p>
             <p className="mb-3 text-muted-foreground">
@@ -214,7 +329,7 @@ export function AuditForm() {
           <button
             type="button"
             className="text-xs text-muted-foreground underline"
-            onClick={() => { setState("idle"); setResult(null); setDomain(""); }}
+            onClick={() => { setState("idle"); setResult(null); setDomain(""); setLead(""); setLeadState("idle"); }}
           >
             Audit another domain
           </button>

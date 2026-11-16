@@ -24,6 +24,13 @@ White-label agency SaaS measuring Google organic + AI-answer visibility, with a
 - Run `pnpm --filter @rootspun/core test` after touching scoring or the Why Engine.
 
 ## Build order (follow the phases)
-Phase 0 foundation + Phase 1/2 core scoring & Why Engine are done. Next up:
-`apps/web` (app shell, auth, dashboards), `apps/worker` (job runner + providers),
-`packages/db` and `packages/ui`.
+Phase 0 foundation + Phase 1/2 core scoring & Why Engine are done. The `apps/web`
+app shell, auth (live hosted Supabase), dashboards, Technical crawl, Keywords
+view and the free `/audit` page are built and running.
+
+The SEO/AEO analysis suite (crawl, on-page, AEO, internal links, readability,
+schema, keyword rank, and the unified "how to rank higher" strategy engine) lives
+in `packages/core` and is documented in `docs/seo-aeo-engine.md` — read that
+before touching scoring/analysis. Live AI-answer and SERP runs still need the
+user's API keys (LLM keys, licensed SERP, or the free Google CSE key); crawling,
+technical SEO and AEO analysis need none.

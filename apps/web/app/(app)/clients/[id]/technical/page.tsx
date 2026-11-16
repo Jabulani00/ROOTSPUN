@@ -19,7 +19,7 @@ export default async function TechnicalPage({ params }: { params: { id: string }
   const { data: pages } = crawl
     ? await supabase
         .from("pages")
-        .select("url, status, canonical, nosnippet, template, issues")
+        .select("url, status, canonical, nosnippet, template, issues, aeo_score")
         .eq("crawl_id", crawl.id)
         .limit(50)
     : { data: [] };
@@ -303,6 +303,7 @@ export default async function TechnicalPage({ params }: { params: { id: string }
                       <th className="px-2 py-1 font-medium">URL</th>
                       <th className="px-2 py-1 font-medium">Status</th>
                       <th className="px-2 py-1 font-medium">Template</th>
+                      <th className="px-2 py-1 font-medium">AEO</th>
                       <th className="px-2 py-1 font-medium">Canonical</th>
                       <th className="px-2 py-1 font-medium">nosnippet</th>
                       <th className="px-2 py-1 font-medium">Issues</th>
@@ -321,6 +322,21 @@ export default async function TechnicalPage({ params }: { params: { id: string }
                           <td className="px-2 py-1">{path}</td>
                           <td className="px-2 py-1 tabular-nums">{p.status}</td>
                           <td className="px-2 py-1 text-muted-foreground">{p.template}</td>
+                          <td className="px-2 py-1">
+                            {p.aeo_score != null ? (
+                              <span
+                                className={cn(
+                                  "tabular-nums",
+                                  p.aeo_score >= 75 && "text-success",
+                                  p.aeo_score < 50 && "text-destructive",
+                                )}
+                              >
+                                {p.aeo_score}
+                              </span>
+                            ) : (
+                              "—"
+                            )}
+                          </td>
                           <td className="px-2 py-1">{p.canonical ? "✓" : "—"}</td>
                           <td className="px-2 py-1">{p.nosnippet ? "⚠" : "—"}</td>
                           <td className="px-2 py-1 tabular-nums text-muted-foreground">
